@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Memory Fun!</title>
+<meta name="description" content="A fun memory game for kids: music, shapes, pictures, words and numbers!">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Memory Fun">
+<meta name="theme-color" content="#7c3aed">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; touch-action:manipulation; }
+  body {
+    font-family:'Chalkboard SE','Comic Sans MS','Segoe UI',sans-serif;
+    background:linear-gradient(160deg,#7c3aed 0%,#3b82f6 50%,#06b6d4 100%);
+    background-attachment:fixed;
+    color:#fff; min-height:100%;
+    user-select:none; -webkit-user-select:none;
+    overflow-x:hidden;
+  }
+  .screen { display:none; min-height:100vh; padding:20px 14px 40px; max-width:760px; margin:0 auto; }
+  .screen.active { display:block; }
+
+  /* ============ MENU ============ */
+  h1.title { text-align:center; font-size:clamp(2rem,8vw,3rem); margin:10px 0 4px;
+    text-shadow:0 3px 0 rgba(0,0,0,.25); }
+  .subtitle { text-align:center; font-size:1.1rem; opacity:.9; margin-bottom:22px; }
+  .mode-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+  .mode-btn {
+    border:none; border-radius:22px; padding:20px 10px 16px; cursor:pointer;
+    font-family:inherit; font-size:1.15rem; font-weight:bold; color:#fff;
+    box-shadow:0 6px 0 rgba(0,0,0,.22); transition:transform .1s;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+  }
+  .mode-btn:active { transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,.22); }
+  .mode-btn .big { font-size:2.6rem; line-height:1; }
+  .mode-btn small { font-weight:normal; font-size:.8rem; opacity:.92; }
+  .m-musical { background:#ec4899; } .m-shapes { background:#f59e0b; }
+  .m-pictures { background:#22c55e; } .m-words { background:#3b82f6; }
+  .m-numbers { background:#8b5cf6; } .m-wordpic { background:#ef4444; }
+
+  /* ============ DIFFICULTY ============ */
+  .diff-wrap { display:flex; flex-direction:column; gap:16px; margin-top:30px; }
+  .diff-btn {
+    border:none; border-radius:22px; padding:22px; cursor:pointer;
+    font-family:inherit; font-size:1.4rem; font-weight:bold; color:#fff;
+    box-shadow:0 6px 0 rgba(0,0,0,.22); transition:transform .1s;
+  }
+  .diff-btn:active { transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,.22); }
+  .diff-btn small { display:block; font-size:.95rem; font-weight:normal; margin-top:4px; opacity:.92; }
+  .d-easy { background:#22c55e; } .d-medium { background:#f59e0b; } .d-hard { background:#ef4444; }
+
+  .back-btn {
+    background:rgba(255,255,255,.22); border:none; color:#fff; font-family:inherit;
+    font-size:1rem; font-weight:bold; padding:10px 18px; border-radius:14px; cursor:pointer;
+  }
+  .back-btn:active { background:rgba(255,255,255,.35); }
+  .screen-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+  .screen-head h2 { font-size:1.3rem; text-shadow:0 2px 0 rgba(0,0,0,.2); text-align:center; flex:1; }
+
+  /* ============ GAME ============ */
+  .hud { display:flex; justify-content:center; gap:12px; margin:8px 0 16px; flex-wrap:wrap; }
+  .hud .pill { background:rgba(255,255,255,.22); border-radius:999px; padding:8px 16px; font-size:1rem; font-weight:bold; }
+  .board { display:grid; gap:10px; justify-content:center; margin:0 auto; }
+  .card {
+    aspect-ratio:3/4; perspective:800px; cursor:pointer; border:none; background:none; padding:0;
+  }
+  .card-inner {
+    position:relative; width:100%; height:100%;
+    transform-style:preserve-3d; transition:transform .45s;
+  }
+  .card.flipped .card-inner, .card.matched .card-inner { transform:rotateY(180deg); }
+  .face {
+    position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden;
+    border-radius:16px; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 10px rgba(0,0,0,.25);
+  }
+  .face.back {
+    background:linear-gradient(145deg,#fbbf24,#f59e0b);
+    font-size:2rem; color:#fff; border:4px solid #fff;
+  }
+  .face.front {
+    background:#fff; color:#333; transform:rotateY(180deg);
+    font-size:2.2rem; border:4px solid #fbbf24; overflow:hidden; padding:4px;
+    flex-direction:column; gap:2px;
+  }
+  .card.matched .face.front { border-color:#22c55e; background:#ecfdf5; animation:pop .4s; }
+  .card.matched { cursor:default; }
+  @keyframes pop { 0%{transform:rotateY(180deg) scale(1)} 50%{transform:rotateY(180deg) scale(1.12)} 100%{transform:rotateY(180deg) scale(1)} }
+  .card.shake .card-inner { animation:shake .4s; }
+  @keyframes shake { 0%,100%{transform:rotateY(180deg) translateX(0)} 25%{transform:rotateY(180deg) translateX(-6px)} 75%{transform:rotateY(180deg) translateX(6px)} }
+  .face.front .word { font-size:clamp(1rem,4.5vw,1.6rem); font-weight:bold; color:#3b82f6; text-align:center; }
+  .face.front .num { font-size:clamp(1.8rem,8vw,3rem); font-weight:bold; color:#8b5cf6; }
+  .face.front .dots { font-size:clamp(.75rem,3vw,1.1rem); line-height:1.25; text-align:center; word-break:break-all; padding:2px; }
+  .face.front svg { width:70%; height:70%; }
+  .face.front .music { font-size:clamp(1.6rem,7vw,2.6rem); }
+
+  /* ============ WIN ============ */
+  #win {
+    position:fixed; inset:0; background:rgba(30,10,60,.75); display:none;
+    align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  #win.show { display:flex; }
+  .win-box {
+    background:linear-gradient(160deg,#fff,#fef3c7); color:#333; border-radius:26px;
+    padding:30px 26px; text-align:center; max-width:340px; width:100%;
+    box-shadow:0 10px 40px rgba(0,0,0,.4); animation:bounceIn .5s;
+  }
+  @keyframes bounceIn { 0%{transform:scale(.5);opacity:0} 70%{transform:scale(1.06)} 100%{transform:scale(1);opacity:1} }
+  .win-box h2 { font-size:1.8rem; color:#7c3aed; margin-bottom:6px; }
+  .win-stars { font-size:2.6rem; letter-spacing:6px; margin:8px 0; }
+  .win-box p { font-size:1.05rem; margin:4px 0; }
+  .win-box .new-best { color:#16a34a; font-weight:bold; }
+  .win-actions { display:flex; gap:10px; margin-top:18px; }
+  .win-actions button {
+    flex:1; border:none; border-radius:16px; padding:14px 8px; font-family:inherit;
+    font-size:1.05rem; font-weight:bold; color:#fff; cursor:pointer; box-shadow:0 4px 0 rgba(0,0,0,.2);
+  }
+  .win-actions button:active { transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.2); }
+  .again { background:#22c55e; } .menu-b { background:#3b82f6; }
+
+  .confetti { position:fixed; top:-40px; z-index:60; font-size:1.6rem; pointer-events:none; animation:fall linear forwards; }
+  @keyframes fall { to { transform:translateY(110vh) rotate(720deg); } }
+
+  footer.credit { text-align:center; margin-top:26px; font-size:.85rem; opacity:.75; }
+</style>
+</head>
+<body>
+
+<!-- ============ MENU SCREEN ============ -->
+<section id="menu" class="screen active">
+  <h1 class="title">🧠 Memory Fun!</h1>
+  <p class="subtitle">Pick a game and find the pairs!</p>
+  <div class="mode-grid">
+    <button class="mode-btn m-musical" data-mode="musical"><span class="big">🎵</span>Musical<small>Match the tunes</small></button>
+    <button class="mode-btn m-shapes" data-mode="shapes"><span class="big">🔷</span>Shapes<small>Match the shapes</small></button>
+    <button class="mode-btn m-pictures" data-mode="pictures"><span class="big">🐶</span>Pictures<small>Match the animals</small></button>
+    <button class="mode-btn m-words" data-mode="words"><span class="big">📖</span>Words<small>Match easy words</small></button>
+    <button class="mode-btn m-numbers" data-mode="numbers"><span class="big">🔢</span>Numbers<small>Count the stars</small></button>
+    <button class="mode-btn m-wordpic" data-mode="wordpic"><span class="big">🧩</span>Word + Picture<small>Read and match</small></button>
+  </div>
+  <footer class="credit">Made with ❤️ for curious kids</footer>
+</section>
+
+<!-- ============ DIFFICULTY SCREEN ============ -->
+<section id="diff" class="screen">
+  <div class="screen-head">
+    <button class="back-btn" onclick="show('menu')">⬅ Back</button>
+    <h2 id="diff-title">Choose your level</h2>
+    <span style="width:70px"></span>
+  </div>
+  <div class="diff-wrap">
+    <button class="diff-btn d-easy" data-pairs="3">😊 Easy<small>6 cards</small></button>
+    <button class="diff-btn d-medium" data-pairs="6">🤔 Medium<small>12 cards</small></button>
+    <button class="diff-btn d-hard" data-pairs="10">🤯 Hard<small>20 cards</small></button>
+  </div>
+</section>
+
+<!-- ============ GAME SCREEN ============ -->
+<section id="game" class="screen">
+  <div class="screen-head">
+    <button class="back-btn" onclick="show('diff')">⬅ Back</button>
+    <h2 id="game-title"></h2>
+    <span style="width:70px"></span>
+  </div>
+  <div class="hud">
+    <span class="pill">Moves: <span id="moves">0</span></span>
+    <span class="pill">Pairs: <span id="found">0</span>/<span id="total">0</span></span>
+    <span class="pill" id="best-pill" style="display:none">Best: <span id="best">–</span></span>
+  </div>
+  <div id="board" class="board"></div>
+</section>
+
+<!-- ============ WIN OVERLAY ============ -->
+<div id="win">
+  <div class="win-box">
+    <h2>🎉 You did it!</h2>
+    <div class="win-stars" id="win-stars"></div>
+    <p>Finished in <b id="win-moves"></b> moves</p>
+    <p id="win-best"></p>
+    <div class="win-actions">
+      <button class="again" onclick="startGame()">🔄 Again</button>
+      <button class="menu-b" onclick="hideWin();show('menu')">🏠 Menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================
+   MEMORY FUN! — a matching game for kids 5–10
+   Modes: musical, shapes, pictures, words, numbers, word+picture
+   ===================================================== */
+
+// ---------- Content for each mode ----------
+const N = { C4:261.63, D4:293.66, E4:329.63, F4:349.23, G4:392.00, A4:440.00, B4:493.88, C5:523.25, D5:587.33, E5:659.25, G5:783.99 };
+const MELODIES = [
+  [N.C4,N.E4,N.G4],   // up
+  [N.C5,N.A4,N.F4],   // down
+  [N.G4,N.G4,N.C5],   // knock knock!
+  [N.C4,N.C4,N.C4],   // low low low
+  [N.E5,N.E5,N.E5],   // high high high
+  [N.C4,N.G4,N.C4],   // bounce
+  [N.D4,N.F4,N.A4],   // dreamy
+  [N.B4,N.A4,N.G4],   // sliding down
+  [N.C4,N.E5,N.C4],   // big jump
+  [N.G4,N.E4,N.G4]    // wobble
+];
+const PICTURES = ['🐶','🐱','🦁','🐸','🦋','🐢','🐠','🦄','🐝','🐧'];
+const WORDS = ['cat','dog','sun','hat','bee','run','big','red','mom','dad'];
+const WORD_PICS = [['cat','🐱'],['dog','🐶'],['sun','☀️'],['bee','🐝'],['fish','🐟'],['star','⭐'],['frog','🐸'],['car','🚗'],['duck','🦆'],['apple','🍎']];
+const SHAPES = [
+  ['circle','#ef4444','<circle cx="50" cy="50" r="40" fill="COL"/>'],
+  ['square','#3b82f6','<rect x="12" y="12" width="76" height="76" rx="8" fill="COL"/>'],
+  ['triangle','#22c55e','<polygon points="50,10 92,88 8,88" fill="COL"/>'],
+  ['star','#f59e0b','<polygon points="50,6 61,38 95,38 67,58 77,92 50,71 23,92 33,58 5,38 39,38" fill="COL"/>'],
+  ['heart','#ec4899','<path d="M50 88 C20 62 8 44 8 30 C8 16 20 8 31 8 C40 8 47 14 50 20 C53 14 60 8 69 8 C80 8 92 16 92 30 C92 44 80 62 50 88Z" fill="COL"/>'],
+  ['diamond','#8b5cf6','<polygon points="50,6 90,50 50,94 10,50" fill="COL"/>'],
+  ['moon','#eab308','<path d="M70 10 A45 45 0 1 0 70 90 A36 36 0 1 1 70 10Z" fill="COL"/>'],
+  ['ring','#06b6d4','<circle cx="50" cy="50" r="38" fill="none" stroke="COL" stroke-width="18"/>'],
+  ['cross','#f97316','<path d="M35 10 h30 v25 h25 v30 h-25 v25 h-30 v-25 h-25 v-30 h25 Z" fill="COL"/>'],
+  ['oval','#14b8a6','<ellipse cx="50" cy="50" rx="44" ry="28" fill="COL"/>']
+];
+
+const MODE_INFO = {
+  musical:  { name:'🎵 Musical' },
+  shapes:   { name:'🔷 Shapes' },
+  pictures: { name:'🐶 Pictures' },
+  words:    { name:'📖 Words' },
+  numbers:  { name:'🔢 Numbers' },
+  wordpic:  { name:'🧩 Word + Picture' }
+};
+
+// ---------- State ----------
+let mode = 'pictures', pairs = 3;
+let deck = [], first = null, lock = false, moves = 0, found = 0;
+
+// ---------- Audio ----------
+let AC = null;
+function audio() {
+  if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+  if (AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, dur, when, type, vol) {
+  const ctx = audio();
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  const t = ctx.currentTime + (when || 0);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(vol || 0.25, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+function playMelody(i) { MELODIES[i].forEach((f, k) => tone(f, 0.28, k * 0.3, 'triangle', 0.3)); }
+function sFlip()  { tone(600, 0.08, 0, 'sine', 0.12); }
+function sMatch() { [N.C5,N.E5,N.G5].forEach((f,k)=>tone(f,0.15,k*0.09,'sine',0.22)); }
+function sWrong() { tone(160, 0.25, 0, 'sawtooth', 0.08); }
+function sWin()   { [N.C4,N.E4,N.G4,N.C5,N.E5,N.G5].forEach((f,k)=>tone(f,0.22,k*0.12,'triangle',0.25)); }
+
+// ---------- Speech (reads words out loud for early readers) ----------
+function say(text) {
+  try {
+    if (!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US'; u.rate = 0.85; u.pitch = 1.1;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+// ---------- Helpers ----------
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function bestKey() { return 'memoryBest_' + mode + '_' + pairs; }
+
+// ---------- Build the deck ----------
+function buildDeck() {
+  const cards = [];
+  const add = (matchId, html, spoken) => cards.push({ matchId, html, spoken });
+
+  if (mode === 'pictures') {
+    shuffle(PICTURES.slice()).slice(0, pairs).forEach((e, i) => {
+      add(i, '<span>' + e + '</span>'); add(i, '<span>' + e + '</span>');
+    });
+  } else if (mode === 'shapes') {
+    shuffle(SHAPES.slice()).slice(0, pairs).forEach((s, i) => {
+      const svg = '<svg viewBox="0 0 100 100">' + s[2].replace(/COL/g, s[1]) + '</svg>';
+      add(i, svg, s[0]); add(i, svg, s[0]);
+    });
+  } else if (mode === 'words') {
+    shuffle(WORDS.slice()).slice(0, pairs).forEach((w, i) => {
+      const html = '<span class="word">' + w + '</span>';
+      add(i, html, w); add(i, html, w);
+    });
+  } else if (mode === 'wordpic') {
+    shuffle(WORD_PICS.slice()).slice(0, pairs).forEach((p, i) => {
+      add(i, '<span class="word">' + p[0] + '</span>', p[0]);
+      add(i, '<span>' + p[1] + '</span>', p[0]);
+    });
+  } else if (mode === 'numbers') {
+    const nums = shuffle([1,2,3,4,5,6,7,8,9,10]).slice(0, pairs);
+    nums.forEach((n, i) => {
+      add(i, '<span class="num">' + n + '</span>', String(n));
+      add(i, '<span class="dots">' + '⭐'.repeat(n) + '</span>', String(n));
+    });
+  } else if (mode === 'musical') {
+    const picks = shuffle([0,1,2,3,4,5,6,7,8,9]).slice(0, pairs);
+    picks.forEach((m) => {
+      add(m, '<span class="music">🎶</span>'); add(m, '<span class="music">🎶</span>');
+    });
+  }
+  return shuffle(cards);
+}
+
+// ---------- Start a game ----------
+function startGame() {
+  hideWin();
+  deck = buildDeck();
+  first = null; lock = false; moves = 0; found = 0;
+
+  document.getElementById('moves').textContent = '0';
+  document.getElementById('found').textContent = '0';
+  document.getElementById('total').textContent = pairs;
+  document.getElementById('game-title').textContent = MODE_INFO[mode].name;
+
+  const best = localStorage.getItem(bestKey());
+  document.getElementById('best-pill').style.display = best ? '' : 'none';
+  document.getElementById('best').textContent = best || '–';
+
+  const cols = pairs === 3 ? 3 : pairs === 6 ? 4 : 5;
+  const board = document.getElementById('board');
+  board.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+  board.style.maxWidth = Math.min(cols * 120, 640) + 'px';
+  board.innerHTML = '';
+
+  deck.forEach((c, i) => {
+    const b = document.createElement('button');
+    b.className = 'card';
+    b.setAttribute('aria-label', 'card');
+    b.innerHTML = '<div class="card-inner">' +
+      '<div class="face back">❓</div>' +
+      '<div class="face front">' + c.html + '</div></div>';
+    b.addEventListener('click', () => flip(b, c));
+    board.appendChild(b);
+  });
+  show('game');
+}
+
+// ---------- Flip logic ----------
+function flip(el, card) {
+  if (lock || el.classList.contains('flipped') || el.classList.contains('matched')) return;
+  audio(); // unlock sound on first tap
+  el.classList.add('flipped');
+  sFlip();
+  if (mode === 'musical') playMelody(card.matchId);
+  else if (card.spoken) say(card.spoken);
+
+  if (!first) { first = { el, card }; return; }
+
+  // second card
+  moves++;
+  document.getElementById('moves').textContent = moves;
+  const a = first; first = null;
+
+  if (a.card.matchId === card.matchId && a.el !== el) {
+    lock = true;
+    const delay = mode === 'musical' ? 1000 : 450;
+    setTimeout(() => {
+      a.el.classList.add('matched'); el.classList.add('matched');
+      sMatch();
+      found++;
+      document.getElementById('found').textContent = found;
+      lock = false;
+      if (found === pairs) setTimeout(winGame, 700);
+    }, delay);
+  } else {
+    lock = true;
+    const delay = mode === 'musical' ? 1400 : 950;
+    setTimeout(() => { el.classList.add('shake'); a.el.classList.add('shake'); sWrong(); }, delay - 400);
+    setTimeout(() => {
+      el.classList.remove('flipped', 'shake');
+      a.el.classList.remove('flipped', 'shake');
+      lock = false;
+    }, delay);
+  }
+}
+
+// ---------- Win ----------
+function winGame() {
+  sWin();
+  const great = Math.ceil(pairs * 1.5), good = Math.ceil(pairs * 2.5);
+  const stars = moves <= great ? 3 : moves <= good ? 2 : 1;
+  document.getElementById('win-stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+  document.getElementById('win-moves').textContent = moves;
+
+  const key = bestKey(), prev = localStorage.getItem(key);
+  let bestMsg = '';
+  if (!prev || moves < parseInt(prev)) {
+    localStorage.setItem(key, moves);
+    bestMsg = '<span class="new-best">🏆 New best score!</span>';
+  } else {
+    bestMsg = 'Your best: ' + prev + ' moves';
+  }
+  document.getElementById('win-best').innerHTML = bestMsg;
+  say(stars === 3 ? 'Amazing! Three stars!' : 'Great job! You found all the pairs!');
+  document.getElementById('win').classList.add('show');
+  confetti();
+}
+function hideWin() { document.getElementById('win').classList.remove('show'); }
+function confetti() {
+  const pieces = ['🎉','⭐','🎊','💜','💙','💛','✨'];
+  for (let i = 0; i < 60; i++) {
+    const d = document.createElement('div');
+    d.className = 'confetti';
+    d.textContent = pieces[Math.floor(Math.random() * pieces.length)];
+    d.style.left = Math.random() * 100 + 'vw';
+    d.style.animationDuration = 2 + Math.random() * 2.5 + 's';
+    d.style.animationDelay = Math.random() * 0.8 + 's';
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 6000);
+  }
+}
+
+// ---------- Navigation ----------
+document.querySelectorAll('.mode-btn').forEach(b =>
+  b.addEventListener('click', () => {
+    mode = b.dataset.mode;
+    document.getElementById('diff-title').textContent = MODE_INFO[mode].name;
+    show('diff');
+  }));
+document.querySelectorAll('.diff-btn').forEach(b =>
+  b.addEventListener('click', () => { pairs = parseInt(b.dataset.pairs); startGame(); }));
+
+// ---------- PWA service worker ----------
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
