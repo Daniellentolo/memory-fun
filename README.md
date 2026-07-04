@@ -22,7 +22,7 @@ Memory and brain-training games for kids aged 6–10. Ten games, each with Easy 
 | 📚 Story Time | Read a detailed story, then answer questions about names, numbers, and details |
 | 🤝 Who Is It? | Remember kids' names AND facts about them ("Who has a parrot named Kiwi?") |
 | 👀 What's Missing? | Study a group of things, spot which one disappeared — visual attention |
-| 🕵️ Odd One Out | Which one doesn't belong? — categorization and logical reasoning |
+| 🕵️ Odd One Out | Which one doesn't belong? — an endless run that climbs from easy to expert puzzles until you miss |
 
 Research on working-memory training in children suggests short daily practice (5–10 minutes) over several weeks is what makes a difference — Number Recall, Grid Memory, and Copy Me are game versions of the tasks used in those studies.
 

@@ -392,8 +392,8 @@
     <span style="width:70px"></span>
   </div>
   <div class="hud">
-    <span class="pill">Round: <span id="odd-round">1</span>/5</span>
-    <span class="pill">Score: <span id="odd-score">0</span></span>
+    <span class="pill">Solved: <span id="odd-score">0</span></span>
+    <span class="pill">Best: <span id="odd-best">0</span></span>
   </div>
   <div class="panel">
     <p class="q-text">Which one does NOT belong?</p>
@@ -480,13 +480,13 @@ function shuffle(a) {
 // ---------- Unified difficulty ----------
 const DIFF = {
   match:   { labels:['6 cards','12 cards','20 cards'] },
-  seq:     { labels:['Start with 1 step','Start with 3 steps','Start with 5 · faster'] },
+  seq:     { labels:['Start with 1 step · speeds up','Start with 3 steps · speeds up','Start with 5 steps · fast'] },
   digits:  { labels:['Start with 2 numbers','Start with 3 numbers','Backwards! 🔄'] },
   grid:    { labels:['3×3 · start with 2','3×3 · start with 3','4×4 · start with 3'] },
   story:   { labels:['3 questions','5 questions','7 questions'] },
   faces:   { labels:['3 kids · names only','5 kids · names + facts','7 kids · names + facts'] },
   missing: { labels:['4 things','6 things','8 things · quick look'] },
-  odd:     { labels:['4 pictures','4 pictures · tricky','5 pictures · extra tricky'] }
+  odd:     { labels:['Start easy · gets harder','Start tricky · gets harder','Expert puzzles only'] }
 };
 const DIFF_TITLES = {
   match_musical:'🎵 Musical', match_pictures:'🐶 Pictures', match_words:'📖 Words',
@@ -550,8 +550,8 @@ const MELODIES = [
   [N.C4,N.E4,N.G4],[N.C5,N.A4,N.F4],[N.G4,N.G4,N.C5],[N.C4,N.C4,N.C4],[N.E5,N.E5,N.E5],
   [N.C4,N.G4,N.C4],[N.D4,N.F4,N.A4],[N.B4,N.A4,N.G4],[N.C4,N.E5,N.C4],[N.G4,N.E4,N.G4]
 ];
-const PICTURES = ['🐶','🐱','🦁','🐸','🦋','🐢','🐠','🦄','🐝','🐧'];
-const WORDS = ['tiger','ocean','magnet','rocket','castle','planet','shadow','thunder','crystal','compass'];
+const PICTURES = ['🐶','🐱','🦁','🐸','🦋','🐢','🐠','🦄','🐝','🐧','🦊','🐼','🐙','🦒','🐺','🦩'];
+const WORDS = ['tiger','ocean','magnet','rocket','castle','planet','shadow','thunder','crystal','compass','dragon','island','marble','pirate','jungle','winter'];
 let mode = 'pictures', pairs = 3;
 let deck = [], first = null, lock = false, moves = 0, found = 0;
 function bestKey() { return 'memoryBest_' + mode + '_' + pairs; }
@@ -676,7 +676,8 @@ function seqNext() {
   document.getElementById('seq-status').textContent = '👀 Watch…';
   seqDisable(true);
   sPlaying = true;
-  const speed = SEQ_CFG[level][1];
+  // speeds up as the pattern grows — always more challenging
+  const speed = Math.max(300, SEQ_CFG[level][1] - (sPat.length - SEQ_CFG[level][0]) * 25);
   sPat.forEach((t, k) => later(() => seqLight(t, speed * 0.55), 800 + k * speed));
   later(() => {
     sPlaying = false;
@@ -946,13 +947,68 @@ const STORIES = [
       { q:'What was Maya’s spooky story about?', o:['A dancing skeleton','A singing ghost','A talking owl'], c:1 },
       { q:'How many times did the marshmallow catch fire?', o:['Once','Twice','Three times'], c:1 },
       { q:'What color was Maya’s bracelet?', o:['Green','Purple','Blue'], c:1 }
+    ]},
+  { t:'The Lost Kitten',
+    s:'On a rainy Thursday, Ava heard a tiny meow coming from under the porch of the yellow house on Birch Lane. A small gray kitten was hiding behind a flower pot, soaked and shivering. Ava wrapped it in her striped scarf and knocked on doors to find its owner. At the fourth house, an old man named Mr. Okafor said the kitten belonged to his granddaughter, and that its name was Pepper. As a thank-you, he gave Ava a jar of honey from his very own bees and showed her the hive humming in his garden. That night, Ava drew a picture of Pepper so she would never forget the rescue.',
+    qs:[
+      { q:'What day did Ava find the kitten?', o:['Thursday','Saturday','Monday'], c:0 },
+      { q:'What color was the house?', o:['Blue','Yellow','White'], c:1 },
+      { q:'What color was the kitten?', o:['Gray','Orange','Black'], c:0 },
+      { q:'What did Ava wrap the kitten in?', o:['Her jacket','A towel','Her striped scarf'], c:2 },
+      { q:'At which house did she find the owner?', o:['The second','The fourth','The seventh'], c:1 },
+      { q:'What was the kitten’s name?', o:['Pepper','Smokey','Misty'], c:0 },
+      { q:'What did Mr. Okafor give Ava?', o:['A jar of honey','A flower pot','Some cookies'], c:0 }
+    ]},
+  { t:'The Robot Contest',
+    s:'Marcus and his cousin Dara spent the whole winter building a robot named Sparky in the garage. Sparky could pick up socks, dance to music, and beep the first notes of “Happy Birthday.” At the spring contest in the town library, twelve teams competed for the golden gear trophy. During their turn, Sparky’s left wheel got stuck — but Dara fixed it with a rubber band in under a minute. The judges were so impressed by the quick repair that they gave Marcus and Dara the prize for best teamwork. Grandma Rose celebrated by baking them a robot-shaped lemon cake.',
+    qs:[
+      { q:'What was the robot’s name?', o:['Sparky','Zippy','Bolt'], c:0 },
+      { q:'Who built the robot with Marcus?', o:['His cousin Dara','His sister Rose','His friend Leo'], c:0 },
+      { q:'What could the robot pick up?', o:['Pencils','Socks','Marbles'], c:1 },
+      { q:'Where was the contest held?', o:['The school gym','The town library','The park'], c:1 },
+      { q:'How many teams competed?', o:['Ten','Twelve','Twenty'], c:1 },
+      { q:'What did Dara use to fix the wheel?', o:['Glue','Tape','A rubber band'], c:2 },
+      { q:'What kind of cake did Grandma Rose bake?', o:['Chocolate','Lemon','Strawberry'], c:1 }
+    ]},
+  { t:'Night at the Museum',
+    s:'Priya’s class visited the science museum on the last day of school. Their guide, Ms. Flores, showed them a real meteorite that was four billion years old and heavier than a washing machine. In the dinosaur hall, Priya counted twenty-one bones in the tail of the T-rex skeleton. Her classmate Oscar got to touch a piece of moon rock while wearing special white gloves. At the gift shop, Priya bought a glow-in-the-dark star map for her bedroom ceiling. On the bus ride home, the class voted the meteorite the coolest thing in the museum — except Oscar, who voted for the moon rock, of course.',
+    qs:[
+      { q:'What was the guide’s name?', o:['Ms. Flores','Ms. Rivera','Ms. Okafor'], c:0 },
+      { q:'How old was the meteorite?', o:['Four million years','Four billion years','Four thousand years'], c:1 },
+      { q:'The meteorite was heavier than a…', o:['Washing machine','Car','Elephant'], c:0 },
+      { q:'How many bones were in the T-rex tail?', o:['Nineteen','Twenty-one','Twenty-five'], c:1 },
+      { q:'Who touched the moon rock?', o:['Priya','Oscar','Ms. Flores'], c:1 },
+      { q:'What color were the special gloves?', o:['White','Blue','Silver'], c:0 },
+      { q:'What did Priya buy at the gift shop?', o:['A dinosaur poster','A star map','A rock kit'], c:1 }
+    ]},
+  { t:'The Great Pancake Race',
+    s:'Every autumn, the town of Milldale holds a pancake race down Main Street. Runners must flip a pancake in their frying pan three times before crossing the finish line. This year, ten-year-old Ruby entered wearing her lucky green sneakers. Halfway down the street, her pancake flew too high and landed on a policeman’s hat — but he laughed and tossed it right back into her pan. Ruby finished second, just behind Mr. Tran the baker, who has now won seven years in a row. Her prize was a wooden spoon painted with sunflowers, and she promised everyone she would beat Mr. Tran next autumn.',
+    qs:[
+      { q:'What is the town called?', o:['Milldale','Riverton','Maplewood'], c:0 },
+      { q:'How many times must runners flip the pancake?', o:['Two','Three','Five'], c:1 },
+      { q:'What color were Ruby’s lucky sneakers?', o:['Red','Green','Purple'], c:1 },
+      { q:'Where did Ruby’s pancake land?', o:['On a policeman’s hat','In a fountain','On a car roof'], c:0 },
+      { q:'Who won the race?', o:['Ruby','Mr. Tran the baker','The policeman'], c:1 },
+      { q:'How many years in a row has he won?', o:['Five','Seven','Nine'], c:1 },
+      { q:'What was Ruby’s prize?', o:['A frying pan','A golden pancake','A wooden spoon'], c:2 }
     ]}
 ];
+// pick stories so every story is played once before any repeats
+function pickStory() {
+  let seen = [];
+  try { seen = JSON.parse(localStorage.getItem('storySeen') || '[]'); } catch(e) {}
+  let unseen = STORIES.map((_, i) => i).filter(i => !seen.includes(i));
+  if (!unseen.length) { seen = []; unseen = STORIES.map((_, i) => i); }
+  const i = unseen[Math.floor(Math.random() * unseen.length)];
+  seen.push(i);
+  localStorage.setItem('storySeen', JSON.stringify(seen));
+  return STORIES[i];
+}
 const STORY_QCOUNT = [3, 5, 7];
 let stStory = null, stQs = [], stIdx = 0, stScore = 0;
 function storyOpen() {
   stopAll(); hideWin();
-  stStory = STORIES[Math.floor(Math.random() * STORIES.length)];
+  stStory = pickStory();
   document.getElementById('story-title').textContent = stStory.t;
   document.getElementById('story-text').textContent = stStory.s;
   document.getElementById('story-read').classList.remove('hidden');
@@ -1156,7 +1212,11 @@ const ODD_SETS = {
     { items:['👟','🧢','🧦','🍕'], odd:'🍕', why:'Pizza is not something you wear!' },
     { items:['🚌','🚗','🚲','🐟'], odd:'🐟', why:'A fish is not a vehicle!' },
     { items:['🌹','🌻','🌷','🪑'], odd:'🪑', why:'A chair is not a flower!' },
-    { items:['🥄','🍴','🥢','📚'], odd:'📚', why:'A book is not for eating with!' }
+    { items:['🥄','🍴','🥢','📚'], odd:'📚', why:'A book is not for eating with!' },
+    { items:['☀️','⭐','🌙','🧦'], odd:'🧦', why:'A sock is not up in the sky!' },
+    { items:['🍦','🍰','🍭','🥦'], odd:'🥦', why:'Broccoli is not a sweet treat!' },
+    { items:['✈️','🚁','🚀','🚂'], odd:'🚂', why:'A train cannot fly!' },
+    { items:['🐟','🐬','🦈','🐴'], odd:'🐴', why:'A horse does not live in the water!' }
   ],
   medium: [
     { items:['🍎','🍓','🍒','🍌'], odd:'🍌', why:'The banana is the only one that is not red!' },
@@ -1164,7 +1224,11 @@ const ODD_SETS = {
     { items:['🥕','🥦','🌽','🍎'], odd:'🍎', why:'An apple is a fruit — the rest are vegetables!' },
     { items:['⚽','🏀','🎾','♟️'], odd:'♟️', why:'Chess is not played with a ball!' },
     { items:['🚗','🚌','🚚','⛵'], odd:'⛵', why:'A boat travels on water, not roads!' },
-    { items:['🧊','❄️','⛄','🔥'], odd:'🔥', why:'Fire is hot — the rest are cold!' }
+    { items:['🧊','❄️','⛄','🔥'], odd:'🔥', why:'Fire is hot — the rest are cold!' },
+    { items:['🎨','🖍️','🖌️','🎻'], odd:'🎻', why:'A violin makes music — the rest make pictures!' },
+    { items:['🍞','🥐','🥖','🧀'], odd:'🧀', why:'Cheese is not baked in an oven like bread!' },
+    { items:['⛄','🎿','🧣','🏖️'], odd:'🏖️', why:'The beach is for summer — the rest are for winter!' },
+    { items:['🐝','🐜','🐞','🐍'], odd:'🐍', why:'A snake is not an insect!' }
   ],
   hard: [
     { items:['🐔','🐷','🐮','🐑','🦁'], odd:'🦁', why:'A lion is wild — the rest are farm animals!' },
@@ -1172,21 +1236,31 @@ const ODD_SETS = {
     { items:['🥁','🎸','🎹','🎺','📻'], odd:'📻', why:'A radio plays music, but you don’t play IT like an instrument!' },
     { items:['🌕','🌍','☀️','🪐','🚀'], odd:'🚀', why:'A rocket is made by people — the rest are in space naturally!' },
     { items:['🍦','🧊','⛄','🌋','❄️'], odd:'🌋', why:'A volcano is burning hot — the rest are freezing cold!' },
-    { items:['✏️','🖍️','🖊️','🖌️','✂️'], odd:'✂️', why:'Scissors cut — all the others draw or write!' }
+    { items:['✏️','🖍️','🖊️','🖌️','✂️'], odd:'✂️', why:'Scissors cut — all the others draw or write!' },
+    { items:['🐋','🐬','🦭','🐠'], odd:'🐠', why:'The fish is the only one that is NOT a mammal — whales, dolphins and seals breathe air!' },
+    { items:['🕷️','🐜','🐝','🦋'], odd:'🕷️', why:'A spider has eight legs — insects only have six!' },
+    { items:['🚲','🛴','🛹','🏍️'], odd:'🏍️', why:'A motorcycle has an engine — the rest you push or pedal!' },
+    { items:['🌧️','❄️','🌩️','🌈'], odd:'🌈', why:'Rain, snow and lightning fall from clouds — a rainbow only appears after!' }
   ]
 };
-let oddRounds = [], oddIdx = 0, oddScore = 0;
+// Endless run: puzzles get harder as you go, one wrong answer ends the game.
+// Easy starts at the easy tier then climbs to medium and hard;
+// Medium starts at tricky; Hard is expert puzzles only.
+const ODD_ORDER = [['easy','medium','hard'], ['medium','hard'], ['hard']];
+const ODD_STARS = [[10, 6], [8, 5], [6, 4]]; // [3-star, 2-star] thresholds per level
+let oddQueue = [], oddIdx = 0, oddScore = 0;
+function oddKey() { return 'oddBest_' + level; }
 function oddOpen() { stopAll(); hideWin(); show('odd'); oddStart(); }
 function oddStart() {
-  const pool = ODD_SETS[['easy','medium','hard'][level]];
-  oddRounds = shuffle(pool.slice()).slice(0, 5);
+  oddQueue = [];
+  ODD_ORDER[level].forEach(tier => { oddQueue = oddQueue.concat(shuffle(ODD_SETS[tier].slice())); });
   oddIdx = 0; oddScore = 0;
   document.getElementById('odd-score').textContent = '0';
+  document.getElementById('odd-best').textContent = localStorage.getItem(oddKey()) || 0;
   oddShow();
 }
 function oddShow() {
-  const r = oddRounds[oddIdx];
-  document.getElementById('odd-round').textContent = oddIdx + 1;
+  const r = oddQueue[oddIdx];
   document.getElementById('odd-why').textContent = '';
   const box = document.getElementById('odd-opts');
   box.innerHTML = '';
@@ -1197,22 +1271,29 @@ function oddShow() {
     box.appendChild(b);
   });
 }
+function oddEnd(title) {
+  const b = bestOf(oddKey(), oddScore);
+  document.getElementById('odd-best').textContent = b.best;
+  const stars = oddScore >= ODD_STARS[level][0] ? 3 : oddScore >= ODD_STARS[level][1] ? 2 : 1;
+  showWin(stars,
+    '<p>You solved <b>' + oddScore + '</b> puzzle' + (oddScore === 1 ? '' : 's') + ' in a row!</p>' +
+    (b.isNew ? '<p class="new-best">🏆 New best!</p>' : '<p>Your best: ' + b.best + '</p>'),
+    oddStart, title);
+}
 function oddAnswer(btn, ok, r) {
   document.querySelectorAll('#odd-opts .opt-btn').forEach((b) => {
     b.disabled = true;
     if (b.textContent === r.odd) b.classList.add('right');
   });
+  document.getElementById('odd-why').textContent = r.why;
   if (ok) { oddScore++; sMatch(); } else { btn.classList.add('wrong'); sWrong(); }
   document.getElementById('odd-score').textContent = oddScore;
-  document.getElementById('odd-why').textContent = r.why;
   later(() => {
+    if (!ok) { oddEnd('🕵️ Game over!'); return; }
     oddIdx++;
-    if (oddIdx < oddRounds.length) oddShow();
-    else {
-      const stars = oddScore >= 5 ? 3 : oddScore >= 3 ? 2 : 1;
-      showWin(stars, '<p>You solved <b>' + oddScore + ' of 5</b> puzzles!</p>', oddStart, '🕵️ Great thinking!');
-    }
-  }, 1800);
+    if (oddIdx < oddQueue.length) oddShow();
+    else oddEnd('🏆 You solved them ALL!');
+  }, 2000);
 }
 
 /* =====================================================
