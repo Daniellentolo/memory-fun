@@ -4,6 +4,8 @@ A fun and educational memory game for kids aged 5–10. Six game modes, three di
 
 ## Game modes
 
+**Matching games** (flip cards, find the pairs — Easy 6 / Medium 12 / Hard 20 cards):
+
 | Mode | What kids practice |
 |---|---|
 | 🎵 Musical | Listening — cards look the same, match them by their tune |
@@ -13,7 +15,16 @@ A fun and educational memory game for kids aged 5–10. Six game modes, three di
 | 🔢 Numbers | Counting — match the number to the right amount of stars |
 | 🧩 Word + Picture | Early reading — match the word "cat" to 🐱 |
 
-Difficulty: Easy (6 cards), Medium (12 cards), Hard (20 cards). Best scores are saved on the device.
+**Brain games** (different kinds of memory, not just matching):
+
+| Mode | What kids practice |
+|---|---|
+| 🎹 Copy Me | Repeat a growing musical pattern on 4 colorful animal tiles |
+| 📚 Story Time | Listen to a short story read aloud, then answer picture questions |
+| 🤗 Who Is It? | Meet animal friends with names, then remember who is who |
+| 👀 What's Missing? | Study a group of things, then spot which one disappeared |
+
+Everything is read aloud for early readers, answers are big tap buttons (no typing), and best scores are saved on the device.
 
 ## How to publish it with GitHub Desktop
 

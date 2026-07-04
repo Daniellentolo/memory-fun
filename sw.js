@@ -1,5 +1,5 @@
 // Memory Fun! service worker — lets the game work offline
-const CACHE = 'memory-fun-v1';
+const CACHE = 'memory-fun-v2';
 const FILES = [
   './',
   './index.html',

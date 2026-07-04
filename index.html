@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Memory Fun!</title>
-<meta name="description" content="A fun memory game for kids: music, shapes, pictures, words and numbers!">
+<meta name="description" content="A fun memory game for kids: matching, music, stories, friends and more!">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
@@ -30,20 +30,23 @@
   /* ============ MENU ============ */
   h1.title { text-align:center; font-size:clamp(2rem,8vw,3rem); margin:10px 0 4px;
     text-shadow:0 3px 0 rgba(0,0,0,.25); }
-  .subtitle { text-align:center; font-size:1.1rem; opacity:.9; margin-bottom:22px; }
+  .subtitle { text-align:center; font-size:1.1rem; opacity:.9; margin-bottom:18px; }
+  .section-label { font-size:1.05rem; margin:18px 4px 10px; opacity:.9; text-shadow:0 2px 0 rgba(0,0,0,.2); }
   .mode-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
   .mode-btn {
-    border:none; border-radius:22px; padding:20px 10px 16px; cursor:pointer;
-    font-family:inherit; font-size:1.15rem; font-weight:bold; color:#fff;
+    border:none; border-radius:22px; padding:18px 10px 14px; cursor:pointer;
+    font-family:inherit; font-size:1.1rem; font-weight:bold; color:#fff;
     box-shadow:0 6px 0 rgba(0,0,0,.22); transition:transform .1s;
-    display:flex; flex-direction:column; align-items:center; gap:8px;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
   }
   .mode-btn:active { transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,.22); }
-  .mode-btn .big { font-size:2.6rem; line-height:1; }
-  .mode-btn small { font-weight:normal; font-size:.8rem; opacity:.92; }
+  .mode-btn .big { font-size:2.4rem; line-height:1; }
+  .mode-btn small { font-weight:normal; font-size:.78rem; opacity:.92; }
   .m-musical { background:#ec4899; } .m-shapes { background:#f59e0b; }
   .m-pictures { background:#22c55e; } .m-words { background:#3b82f6; }
   .m-numbers { background:#8b5cf6; } .m-wordpic { background:#ef4444; }
+  .m-seq { background:#0ea5e9; } .m-story { background:#16a34a; }
+  .m-faces { background:#f97316; } .m-missing { background:#d946ef; }
 
   /* ============ DIFFICULTY ============ */
   .diff-wrap { display:flex; flex-direction:column; gap:16px; margin-top:30px; }
@@ -64,27 +67,28 @@
   .screen-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
   .screen-head h2 { font-size:1.3rem; text-shadow:0 2px 0 rgba(0,0,0,.2); text-align:center; flex:1; }
 
-  /* ============ GAME ============ */
+  /* small difficulty chips used inside brain games */
+  .chip-row { display:flex; justify-content:center; gap:8px; margin:6px 0 14px; flex-wrap:wrap; }
+  .chip {
+    border:2px solid rgba(255,255,255,.6); background:rgba(255,255,255,.15); color:#fff;
+    font-family:inherit; font-weight:bold; font-size:.85rem; padding:7px 14px;
+    border-radius:999px; cursor:pointer;
+  }
+  .chip.active { background:#fff; color:#7c3aed; }
+
+  /* ============ MATCHING GAME ============ */
   .hud { display:flex; justify-content:center; gap:12px; margin:8px 0 16px; flex-wrap:wrap; }
   .hud .pill { background:rgba(255,255,255,.22); border-radius:999px; padding:8px 16px; font-size:1rem; font-weight:bold; }
   .board { display:grid; gap:10px; justify-content:center; margin:0 auto; }
-  .card {
-    aspect-ratio:3/4; perspective:800px; cursor:pointer; border:none; background:none; padding:0;
-  }
-  .card-inner {
-    position:relative; width:100%; height:100%;
-    transform-style:preserve-3d; transition:transform .45s;
-  }
+  .card { aspect-ratio:3/4; perspective:800px; cursor:pointer; border:none; background:none; padding:0; }
+  .card-inner { position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .45s; }
   .card.flipped .card-inner, .card.matched .card-inner { transform:rotateY(180deg); }
   .face {
     position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden;
     border-radius:16px; display:flex; align-items:center; justify-content:center;
     box-shadow:0 4px 10px rgba(0,0,0,.25);
   }
-  .face.back {
-    background:linear-gradient(145deg,#fbbf24,#f59e0b);
-    font-size:2rem; color:#fff; border:4px solid #fff;
-  }
+  .face.back { background:linear-gradient(145deg,#fbbf24,#f59e0b); font-size:2rem; color:#fff; border:4px solid #fff; }
   .face.front {
     background:#fff; color:#333; transform:rotateY(180deg);
     font-size:2.2rem; border:4px solid #fbbf24; overflow:hidden; padding:4px;
@@ -93,19 +97,77 @@
   .card.matched .face.front { border-color:#22c55e; background:#ecfdf5; animation:pop .4s; }
   .card.matched { cursor:default; }
   @keyframes pop { 0%{transform:rotateY(180deg) scale(1)} 50%{transform:rotateY(180deg) scale(1.12)} 100%{transform:rotateY(180deg) scale(1)} }
-  .card.shake .card-inner { animation:shake .4s; }
-  @keyframes shake { 0%,100%{transform:rotateY(180deg) translateX(0)} 25%{transform:rotateY(180deg) translateX(-6px)} 75%{transform:rotateY(180deg) translateX(6px)} }
+  .card.shake .card-inner { animation:cardshake .4s; }
+  @keyframes cardshake { 0%,100%{transform:rotateY(180deg) translateX(0)} 25%{transform:rotateY(180deg) translateX(-6px)} 75%{transform:rotateY(180deg) translateX(6px)} }
   .face.front .word { font-size:clamp(1rem,4.5vw,1.6rem); font-weight:bold; color:#3b82f6; text-align:center; }
   .face.front .num { font-size:clamp(1.8rem,8vw,3rem); font-weight:bold; color:#8b5cf6; }
   .face.front .dots { font-size:clamp(.75rem,3vw,1.1rem); line-height:1.25; text-align:center; word-break:break-all; padding:2px; }
   .face.front svg { width:70%; height:70%; }
   .face.front .music { font-size:clamp(1.6rem,7vw,2.6rem); }
 
-  /* ============ WIN ============ */
-  #win {
-    position:fixed; inset:0; background:rgba(30,10,60,.75); display:none;
-    align-items:center; justify-content:center; z-index:50; padding:20px;
+  /* ============ SEQUENCE (Copy Me) ============ */
+  .seq-status { text-align:center; font-size:1.2rem; font-weight:bold; margin:10px 0; min-height:1.6em; text-shadow:0 2px 0 rgba(0,0,0,.2); }
+  .seq-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; max-width:320px; margin:10px auto; }
+  .seq-tile {
+    height:120px; border-radius:22px; border:5px solid rgba(255,255,255,.85); cursor:pointer;
+    font-size:2.4rem; box-shadow:0 6px 14px rgba(0,0,0,.25); transition:transform .1s, filter .1s;
+    touch-action:manipulation;
   }
+  .seq-tile:disabled { cursor:default; opacity:.92; }
+  .seq-tile.lit { filter:brightness(1.6); transform:scale(1.07); }
+  .seq-tile:active:not(:disabled) { transform:scale(.95); }
+  .t-red { background:#ef4444; } .t-blue { background:#3b82f6; }
+  .t-green { background:#22c55e; } .t-yellow { background:#facc15; }
+  .center-row { display:flex; justify-content:center; gap:10px; margin-top:16px; }
+  .big-btn {
+    border:none; border-radius:18px; padding:14px 28px; font-family:inherit; font-size:1.15rem;
+    font-weight:bold; color:#fff; background:#22c55e; cursor:pointer; box-shadow:0 5px 0 rgba(0,0,0,.22);
+  }
+  .big-btn:active { transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.22); }
+  .big-btn.alt { background:#f59e0b; }
+
+  /* ============ STORY / QUIZ shared ============ */
+  .panel {
+    background:rgba(255,255,255,.95); color:#333; border-radius:22px; padding:20px 18px;
+    box-shadow:0 6px 20px rgba(0,0,0,.25); margin:0 auto; max-width:560px;
+  }
+  .panel h3 { color:#7c3aed; font-size:1.25rem; margin-bottom:10px; text-align:center; }
+  .story-text { font-size:1.25rem; line-height:1.9; color:#374151; }
+  .q-text { font-size:1.25rem; font-weight:bold; color:#374151; text-align:center; margin:8px 0 16px; }
+  .opts { display:flex; flex-direction:column; gap:10px; }
+  .opt-btn {
+    border:3px solid #c4b5fd; background:#f5f3ff; color:#4c1d95; border-radius:16px;
+    padding:14px; font-family:inherit; font-size:1.15rem; font-weight:bold; cursor:pointer;
+    transition:transform .1s; touch-action:manipulation;
+  }
+  .opt-btn:active { transform:scale(.97); }
+  .opt-btn.right { background:#dcfce7; border-color:#22c55e; color:#166534; }
+  .opt-btn.wrong { background:#fee2e2; border-color:#ef4444; color:#991b1b; }
+  .progress-txt { text-align:center; margin-top:12px; color:#6b7280; font-size:.9rem; }
+
+  /* ============ FRIENDS (faces & names) ============ */
+  .friends-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:10px; margin:8px 0; }
+  .friend-card {
+    background:#fff; border:3px solid #e9d5ff; border-radius:18px; padding:12px 6px 10px;
+    text-align:center; cursor:pointer; transition:transform .1s;
+  }
+  .friend-card:active { transform:scale(.95); }
+  .friend-face { width:62px; height:62px; border-radius:50%; margin:0 auto 6px; display:flex; align-items:center; justify-content:center; font-size:2rem; }
+  .friend-name { font-weight:bold; color:#7c3aed; font-size:1rem; }
+  .friend-fact { font-size:.72rem; color:#6b7280; margin-top:2px; }
+  .quiz-face { width:110px; height:110px; border-radius:50%; margin:4px auto 12px; display:flex; align-items:center; justify-content:center; font-size:3.4rem; border:5px solid #e9d5ff; }
+
+  /* ============ WHAT'S MISSING ============ */
+  .items-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin:14px 0; }
+  .item { font-size:clamp(2.4rem,10vw,3.4rem); animation:popIn .3s ease; }
+  @keyframes popIn { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
+  .items-grid.small .item { font-size:2rem; }
+  .count-big { text-align:center; font-size:2.2rem; font-weight:bold; text-shadow:0 3px 0 rgba(0,0,0,.25); }
+  .opts.emoji-opts { flex-direction:row; justify-content:center; }
+  .opts.emoji-opts .opt-btn { font-size:2.2rem; padding:12px 20px; }
+
+  /* ============ WIN ============ */
+  #win { position:fixed; inset:0; background:rgba(30,10,60,.75); display:none; align-items:center; justify-content:center; z-index:50; padding:20px; }
   #win.show { display:flex; }
   .win-box {
     background:linear-gradient(160deg,#fff,#fef3c7); color:#333; border-radius:26px;
@@ -127,16 +189,18 @@
 
   .confetti { position:fixed; top:-40px; z-index:60; font-size:1.6rem; pointer-events:none; animation:fall linear forwards; }
   @keyframes fall { to { transform:translateY(110vh) rotate(720deg); } }
-
+  .hidden { display:none !important; }
   footer.credit { text-align:center; margin-top:26px; font-size:.85rem; opacity:.75; }
 </style>
 </head>
 <body>
 
-<!-- ============ MENU SCREEN ============ -->
+<!-- ============ MENU ============ -->
 <section id="menu" class="screen active">
   <h1 class="title">🧠 Memory Fun!</h1>
-  <p class="subtitle">Pick a game and find the pairs!</p>
+  <p class="subtitle">Pick a game and play!</p>
+
+  <div class="section-label">🃏 Matching Games</div>
   <div class="mode-grid">
     <button class="mode-btn m-musical" data-mode="musical"><span class="big">🎵</span>Musical<small>Match the tunes</small></button>
     <button class="mode-btn m-shapes" data-mode="shapes"><span class="big">🔷</span>Shapes<small>Match the shapes</small></button>
@@ -145,10 +209,18 @@
     <button class="mode-btn m-numbers" data-mode="numbers"><span class="big">🔢</span>Numbers<small>Count the stars</small></button>
     <button class="mode-btn m-wordpic" data-mode="wordpic"><span class="big">🧩</span>Word + Picture<small>Read and match</small></button>
   </div>
+
+  <div class="section-label">🧠 Brain Games</div>
+  <div class="mode-grid">
+    <button class="mode-btn m-seq" data-game="seq"><span class="big">🎹</span>Copy Me<small>Repeat the musical pattern</small></button>
+    <button class="mode-btn m-story" data-game="story"><span class="big">📚</span>Story Time<small>Listen and remember</small></button>
+    <button class="mode-btn m-faces" data-game="faces"><span class="big">🤗</span>Who Is It?<small>Remember your new friends</small></button>
+    <button class="mode-btn m-missing" data-game="missing"><span class="big">👀</span>What's Missing?<small>Spot what disappeared</small></button>
+  </div>
   <footer class="credit">Made with ❤️ for curious kids</footer>
 </section>
 
-<!-- ============ DIFFICULTY SCREEN ============ -->
+<!-- ============ MATCHING: DIFFICULTY ============ -->
 <section id="diff" class="screen">
   <div class="screen-head">
     <button class="back-btn" onclick="show('menu')">⬅ Back</button>
@@ -162,7 +234,7 @@
   </div>
 </section>
 
-<!-- ============ GAME SCREEN ============ -->
+<!-- ============ MATCHING: GAME ============ -->
 <section id="game" class="screen">
   <div class="screen-head">
     <button class="back-btn" onclick="show('diff')">⬅ Back</button>
@@ -177,15 +249,117 @@
   <div id="board" class="board"></div>
 </section>
 
+<!-- ============ COPY ME (sequence) ============ -->
+<section id="seq" class="screen">
+  <div class="screen-head">
+    <button class="back-btn" onclick="stopAll();show('menu')">⬅ Back</button>
+    <h2>🎹 Copy Me</h2>
+    <span style="width:70px"></span>
+  </div>
+  <div class="hud">
+    <span class="pill">Level: <span id="seq-level">–</span></span>
+    <span class="pill">Best: <span id="seq-best">0</span></span>
+  </div>
+  <div class="seq-status" id="seq-status">Watch the tiles, then copy the pattern!</div>
+  <div class="seq-grid">
+    <button class="seq-tile t-red" id="tile0" disabled onclick="seqTap(0)">🐘</button>
+    <button class="seq-tile t-blue" id="tile1" disabled onclick="seqTap(1)">🐬</button>
+    <button class="seq-tile t-green" id="tile2" disabled onclick="seqTap(2)">🐸</button>
+    <button class="seq-tile t-yellow" id="tile3" disabled onclick="seqTap(3)">🐥</button>
+  </div>
+  <div class="center-row"><button class="big-btn" id="seq-start" onclick="seqStart()">▶ Start</button></div>
+</section>
+
+<!-- ============ STORY TIME ============ -->
+<section id="story" class="screen">
+  <div class="screen-head">
+    <button class="back-btn" onclick="stopAll();show('menu')">⬅ Back</button>
+    <h2>📚 Story Time</h2>
+    <span style="width:70px"></span>
+  </div>
+  <div class="chip-row">
+    <button class="chip active" data-stq="2" onclick="storyDiff(2,this)">😊 2 questions</button>
+    <button class="chip" data-stq="3" onclick="storyDiff(3,this)">🤔 3 questions</button>
+    <button class="chip" data-stq="4" onclick="storyDiff(4,this)">🤯 4 questions</button>
+  </div>
+  <div id="story-read" class="panel">
+    <h3 id="story-title"></h3>
+    <p class="story-text" id="story-text"></p>
+    <div class="center-row">
+      <button class="big-btn alt" onclick="readStory()">🔊 Read to me</button>
+      <button class="big-btn" onclick="storyQuiz()">I'm ready! ✨</button>
+    </div>
+  </div>
+  <div id="story-q" class="panel hidden">
+    <p class="q-text" id="story-question"></p>
+    <div class="opts" id="story-opts"></div>
+    <p class="progress-txt" id="story-prog"></p>
+  </div>
+</section>
+
+<!-- ============ WHO IS IT? ============ -->
+<section id="faces" class="screen">
+  <div class="screen-head">
+    <button class="back-btn" onclick="stopAll();show('menu')">⬅ Back</button>
+    <h2>🤗 Who Is It?</h2>
+    <span style="width:70px"></span>
+  </div>
+  <div class="chip-row">
+    <button class="chip active" onclick="facesDiff(3,this)">😊 3 friends</button>
+    <button class="chip" onclick="facesDiff(5,this)">🤔 5 friends</button>
+    <button class="chip" onclick="facesDiff(7,this)">🤯 7 friends</button>
+  </div>
+  <div id="faces-study" class="panel">
+    <h3>Meet your new friends! 👋</h3>
+    <p style="text-align:center;color:#6b7280;font-size:.9rem;margin-bottom:8px;">Tap a friend to hear their name</p>
+    <div class="friends-grid" id="friends-grid"></div>
+    <div class="center-row"><button class="big-btn" onclick="facesQuiz()">Quiz me! ✨</button></div>
+  </div>
+  <div id="faces-q" class="panel hidden">
+    <p class="q-text">Who is this?</p>
+    <div class="quiz-face" id="quiz-face"></div>
+    <div class="opts" id="faces-opts"></div>
+    <p class="progress-txt" id="faces-prog"></p>
+  </div>
+</section>
+
+<!-- ============ WHAT'S MISSING? ============ -->
+<section id="missing" class="screen">
+  <div class="screen-head">
+    <button class="back-btn" onclick="stopAll();show('menu')">⬅ Back</button>
+    <h2>👀 What's Missing?</h2>
+    <span style="width:70px"></span>
+  </div>
+  <div class="chip-row">
+    <button class="chip active" onclick="missDiff(4,this)">😊 4 things</button>
+    <button class="chip" onclick="missDiff(6,this)">🤔 6 things</button>
+    <button class="chip" onclick="missDiff(8,this)">🤯 8 things</button>
+  </div>
+  <div class="hud">
+    <span class="pill">Round: <span id="miss-round">1</span>/5</span>
+    <span class="pill">Score: <span id="miss-score">0</span></span>
+  </div>
+  <div id="miss-look" class="panel">
+    <h3>Look carefully! 🔍</h3>
+    <div class="items-grid" id="miss-items"></div>
+    <div class="count-big" id="miss-count" style="color:#7c3aed"></div>
+  </div>
+  <div id="miss-ask" class="panel hidden">
+    <p class="q-text">One thing is gone… what's missing?</p>
+    <div class="items-grid small" id="miss-left"></div>
+    <div class="opts emoji-opts" id="miss-opts"></div>
+  </div>
+  <div class="center-row"><button class="big-btn hidden" id="miss-start" onclick="missStart()">▶ Play again</button></div>
+</section>
+
 <!-- ============ WIN OVERLAY ============ -->
 <div id="win">
   <div class="win-box">
-    <h2>🎉 You did it!</h2>
+    <h2 id="win-title">🎉 You did it!</h2>
     <div class="win-stars" id="win-stars"></div>
-    <p>Finished in <b id="win-moves"></b> moves</p>
-    <p id="win-best"></p>
+    <div id="win-body"></div>
     <div class="win-actions">
-      <button class="again" onclick="startGame()">🔄 Again</button>
+      <button class="again" onclick="hideWin();againFn()">🔄 Again</button>
       <button class="menu-b" onclick="hideWin();show('menu')">🏠 Menu</button>
     </div>
   </div>
@@ -193,54 +367,13 @@
 
 <script>
 /* =====================================================
-   MEMORY FUN! — a matching game for kids 5–10
-   Modes: musical, shapes, pictures, words, numbers, word+picture
+   MEMORY FUN! — memory games for kids 5–10
+   Matching: musical, shapes, pictures, words, numbers, word+picture
+   Brain games: Copy Me, Story Time, Who Is It?, What's Missing?
    ===================================================== */
 
-// ---------- Content for each mode ----------
-const N = { C4:261.63, D4:293.66, E4:329.63, F4:349.23, G4:392.00, A4:440.00, B4:493.88, C5:523.25, D5:587.33, E5:659.25, G5:783.99 };
-const MELODIES = [
-  [N.C4,N.E4,N.G4],   // up
-  [N.C5,N.A4,N.F4],   // down
-  [N.G4,N.G4,N.C5],   // knock knock!
-  [N.C4,N.C4,N.C4],   // low low low
-  [N.E5,N.E5,N.E5],   // high high high
-  [N.C4,N.G4,N.C4],   // bounce
-  [N.D4,N.F4,N.A4],   // dreamy
-  [N.B4,N.A4,N.G4],   // sliding down
-  [N.C4,N.E5,N.C4],   // big jump
-  [N.G4,N.E4,N.G4]    // wobble
-];
-const PICTURES = ['🐶','🐱','🦁','🐸','🦋','🐢','🐠','🦄','🐝','🐧'];
-const WORDS = ['cat','dog','sun','hat','bee','run','big','red','mom','dad'];
-const WORD_PICS = [['cat','🐱'],['dog','🐶'],['sun','☀️'],['bee','🐝'],['fish','🐟'],['star','⭐'],['frog','🐸'],['car','🚗'],['duck','🦆'],['apple','🍎']];
-const SHAPES = [
-  ['circle','#ef4444','<circle cx="50" cy="50" r="40" fill="COL"/>'],
-  ['square','#3b82f6','<rect x="12" y="12" width="76" height="76" rx="8" fill="COL"/>'],
-  ['triangle','#22c55e','<polygon points="50,10 92,88 8,88" fill="COL"/>'],
-  ['star','#f59e0b','<polygon points="50,6 61,38 95,38 67,58 77,92 50,71 23,92 33,58 5,38 39,38" fill="COL"/>'],
-  ['heart','#ec4899','<path d="M50 88 C20 62 8 44 8 30 C8 16 20 8 31 8 C40 8 47 14 50 20 C53 14 60 8 69 8 C80 8 92 16 92 30 C92 44 80 62 50 88Z" fill="COL"/>'],
-  ['diamond','#8b5cf6','<polygon points="50,6 90,50 50,94 10,50" fill="COL"/>'],
-  ['moon','#eab308','<path d="M70 10 A45 45 0 1 0 70 90 A36 36 0 1 1 70 10Z" fill="COL"/>'],
-  ['ring','#06b6d4','<circle cx="50" cy="50" r="38" fill="none" stroke="COL" stroke-width="18"/>'],
-  ['cross','#f97316','<path d="M35 10 h30 v25 h25 v30 h-25 v25 h-30 v-25 h-25 v-30 h25 Z" fill="COL"/>'],
-  ['oval','#14b8a6','<ellipse cx="50" cy="50" rx="44" ry="28" fill="COL"/>']
-];
-
-const MODE_INFO = {
-  musical:  { name:'🎵 Musical' },
-  shapes:   { name:'🔷 Shapes' },
-  pictures: { name:'🐶 Pictures' },
-  words:    { name:'📖 Words' },
-  numbers:  { name:'🔢 Numbers' },
-  wordpic:  { name:'🧩 Word + Picture' }
-};
-
-// ---------- State ----------
-let mode = 'pictures', pairs = 3;
-let deck = [], first = null, lock = false, moves = 0, found = 0;
-
 // ---------- Audio ----------
+const N = { C4:261.63, D4:293.66, E4:329.63, F4:349.23, G4:392.00, A4:440.00, B4:493.88, C5:523.25, D5:587.33, E5:659.25, G5:783.99 };
 let AC = null;
 function audio() {
   if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
@@ -258,13 +391,12 @@ function tone(freq, dur, when, type, vol) {
   o.connect(g); g.connect(ctx.destination);
   o.start(t); o.stop(t + dur + 0.05);
 }
-function playMelody(i) { MELODIES[i].forEach((f, k) => tone(f, 0.28, k * 0.3, 'triangle', 0.3)); }
 function sFlip()  { tone(600, 0.08, 0, 'sine', 0.12); }
 function sMatch() { [N.C5,N.E5,N.G5].forEach((f,k)=>tone(f,0.15,k*0.09,'sine',0.22)); }
 function sWrong() { tone(160, 0.25, 0, 'sawtooth', 0.08); }
 function sWin()   { [N.C4,N.E4,N.G4,N.C5,N.E5,N.G5].forEach((f,k)=>tone(f,0.22,k*0.12,'triangle',0.25)); }
 
-// ---------- Speech (reads words out loud for early readers) ----------
+// ---------- Speech (reads things aloud for early readers) ----------
 function say(text) {
   try {
     if (!('speechSynthesis' in window)) return;
@@ -274,11 +406,16 @@ function say(text) {
     speechSynthesis.speak(u);
   } catch (e) {}
 }
+function stopSay() { try { speechSynthesis.cancel(); } catch(e){} }
 
 // ---------- Helpers ----------
+let timers = [];
+function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+function stopAll() { timers.forEach(clearTimeout); timers = []; stopSay(); }
 function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
 }
 function shuffle(a) {
   for (let i = a.length - 1; i > 0; i--) {
@@ -287,140 +424,20 @@ function shuffle(a) {
   }
   return a;
 }
-function bestKey() { return 'memoryBest_' + mode + '_' + pairs; }
-
-// ---------- Build the deck ----------
-function buildDeck() {
-  const cards = [];
-  const add = (matchId, html, spoken) => cards.push({ matchId, html, spoken });
-
-  if (mode === 'pictures') {
-    shuffle(PICTURES.slice()).slice(0, pairs).forEach((e, i) => {
-      add(i, '<span>' + e + '</span>'); add(i, '<span>' + e + '</span>');
-    });
-  } else if (mode === 'shapes') {
-    shuffle(SHAPES.slice()).slice(0, pairs).forEach((s, i) => {
-      const svg = '<svg viewBox="0 0 100 100">' + s[2].replace(/COL/g, s[1]) + '</svg>';
-      add(i, svg, s[0]); add(i, svg, s[0]);
-    });
-  } else if (mode === 'words') {
-    shuffle(WORDS.slice()).slice(0, pairs).forEach((w, i) => {
-      const html = '<span class="word">' + w + '</span>';
-      add(i, html, w); add(i, html, w);
-    });
-  } else if (mode === 'wordpic') {
-    shuffle(WORD_PICS.slice()).slice(0, pairs).forEach((p, i) => {
-      add(i, '<span class="word">' + p[0] + '</span>', p[0]);
-      add(i, '<span>' + p[1] + '</span>', p[0]);
-    });
-  } else if (mode === 'numbers') {
-    const nums = shuffle([1,2,3,4,5,6,7,8,9,10]).slice(0, pairs);
-    nums.forEach((n, i) => {
-      add(i, '<span class="num">' + n + '</span>', String(n));
-      add(i, '<span class="dots">' + '⭐'.repeat(n) + '</span>', String(n));
-    });
-  } else if (mode === 'musical') {
-    const picks = shuffle([0,1,2,3,4,5,6,7,8,9]).slice(0, pairs);
-    picks.forEach((m) => {
-      add(m, '<span class="music">🎶</span>'); add(m, '<span class="music">🎶</span>');
-    });
-  }
-  return shuffle(cards);
+function chipSelect(el) {
+  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
 }
 
-// ---------- Start a game ----------
-function startGame() {
-  hideWin();
-  deck = buildDeck();
-  first = null; lock = false; moves = 0; found = 0;
-
-  document.getElementById('moves').textContent = '0';
-  document.getElementById('found').textContent = '0';
-  document.getElementById('total').textContent = pairs;
-  document.getElementById('game-title').textContent = MODE_INFO[mode].name;
-
-  const best = localStorage.getItem(bestKey());
-  document.getElementById('best-pill').style.display = best ? '' : 'none';
-  document.getElementById('best').textContent = best || '–';
-
-  const cols = pairs === 3 ? 3 : pairs === 6 ? 4 : 5;
-  const board = document.getElementById('board');
-  board.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
-  board.style.maxWidth = Math.min(cols * 120, 640) + 'px';
-  board.innerHTML = '';
-
-  deck.forEach((c, i) => {
-    const b = document.createElement('button');
-    b.className = 'card';
-    b.setAttribute('aria-label', 'card');
-    b.innerHTML = '<div class="card-inner">' +
-      '<div class="face back">❓</div>' +
-      '<div class="face front">' + c.html + '</div></div>';
-    b.addEventListener('click', () => flip(b, c));
-    board.appendChild(b);
-  });
-  show('game');
-}
-
-// ---------- Flip logic ----------
-function flip(el, card) {
-  if (lock || el.classList.contains('flipped') || el.classList.contains('matched')) return;
-  audio(); // unlock sound on first tap
-  el.classList.add('flipped');
-  sFlip();
-  if (mode === 'musical') playMelody(card.matchId);
-  else if (card.spoken) say(card.spoken);
-
-  if (!first) { first = { el, card }; return; }
-
-  // second card
-  moves++;
-  document.getElementById('moves').textContent = moves;
-  const a = first; first = null;
-
-  if (a.card.matchId === card.matchId && a.el !== el) {
-    lock = true;
-    const delay = mode === 'musical' ? 1000 : 450;
-    setTimeout(() => {
-      a.el.classList.add('matched'); el.classList.add('matched');
-      sMatch();
-      found++;
-      document.getElementById('found').textContent = found;
-      lock = false;
-      if (found === pairs) setTimeout(winGame, 700);
-    }, delay);
-  } else {
-    lock = true;
-    const delay = mode === 'musical' ? 1400 : 950;
-    setTimeout(() => { el.classList.add('shake'); a.el.classList.add('shake'); sWrong(); }, delay - 400);
-    setTimeout(() => {
-      el.classList.remove('flipped', 'shake');
-      a.el.classList.remove('flipped', 'shake');
-      lock = false;
-    }, delay);
-  }
-}
-
-// ---------- Win ----------
-function winGame() {
-  sWin();
-  const great = Math.ceil(pairs * 1.5), good = Math.ceil(pairs * 2.5);
-  const stars = moves <= great ? 3 : moves <= good ? 2 : 1;
-  document.getElementById('win-stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
-  document.getElementById('win-moves').textContent = moves;
-
-  const key = bestKey(), prev = localStorage.getItem(key);
-  let bestMsg = '';
-  if (!prev || moves < parseInt(prev)) {
-    localStorage.setItem(key, moves);
-    bestMsg = '<span class="new-best">🏆 New best score!</span>';
-  } else {
-    bestMsg = 'Your best: ' + prev + ' moves';
-  }
-  document.getElementById('win-best').innerHTML = bestMsg;
-  say(stars === 3 ? 'Amazing! Three stars!' : 'Great job! You found all the pairs!');
+// ---------- Win overlay (shared by every game) ----------
+let againFn = () => {};
+function showWin(stars, bodyHtml, again, title) {
+  againFn = again || (() => {});
+  document.getElementById('win-title').textContent = title || '🎉 You did it!';
+  document.getElementById('win-stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(Math.max(0, 3 - stars));
+  document.getElementById('win-body').innerHTML = bodyHtml;
   document.getElementById('win').classList.add('show');
-  confetti();
+  sWin(); confetti();
 }
 function hideWin() { document.getElementById('win').classList.remove('show'); }
 function confetti() {
@@ -437,8 +454,453 @@ function confetti() {
   }
 }
 
-// ---------- Navigation ----------
-document.querySelectorAll('.mode-btn').forEach(b =>
+/* =====================================================
+   PART 1 — MATCHING CARD GAMES
+   ===================================================== */
+const MELODIES = [
+  [N.C4,N.E4,N.G4],[N.C5,N.A4,N.F4],[N.G4,N.G4,N.C5],[N.C4,N.C4,N.C4],[N.E5,N.E5,N.E5],
+  [N.C4,N.G4,N.C4],[N.D4,N.F4,N.A4],[N.B4,N.A4,N.G4],[N.C4,N.E5,N.C4],[N.G4,N.E4,N.G4]
+];
+const PICTURES = ['🐶','🐱','🦁','🐸','🦋','🐢','🐠','🦄','🐝','🐧'];
+const WORDS = ['cat','dog','sun','hat','bee','run','big','red','mom','dad'];
+const WORD_PICS = [['cat','🐱'],['dog','🐶'],['sun','☀️'],['bee','🐝'],['fish','🐟'],['star','⭐'],['frog','🐸'],['car','🚗'],['duck','🦆'],['apple','🍎']];
+const SHAPES = [
+  ['circle','#ef4444','<circle cx="50" cy="50" r="40" fill="COL"/>'],
+  ['square','#3b82f6','<rect x="12" y="12" width="76" height="76" rx="8" fill="COL"/>'],
+  ['triangle','#22c55e','<polygon points="50,10 92,88 8,88" fill="COL"/>'],
+  ['star','#f59e0b','<polygon points="50,6 61,38 95,38 67,58 77,92 50,71 23,92 33,58 5,38 39,38" fill="COL"/>'],
+  ['heart','#ec4899','<path d="M50 88 C20 62 8 44 8 30 C8 16 20 8 31 8 C40 8 47 14 50 20 C53 14 60 8 69 8 C80 8 92 16 92 30 C92 44 80 62 50 88Z" fill="COL"/>'],
+  ['diamond','#8b5cf6','<polygon points="50,6 90,50 50,94 10,50" fill="COL"/>'],
+  ['moon','#eab308','<path d="M70 10 A45 45 0 1 0 70 90 A36 36 0 1 1 70 10Z" fill="COL"/>'],
+  ['ring','#06b6d4','<circle cx="50" cy="50" r="38" fill="none" stroke="COL" stroke-width="18"/>'],
+  ['cross','#f97316','<path d="M35 10 h30 v25 h25 v30 h-25 v25 h-30 v-25 h-25 v-30 h25 Z" fill="COL"/>'],
+  ['oval','#14b8a6','<ellipse cx="50" cy="50" rx="44" ry="28" fill="COL"/>']
+];
+const MODE_INFO = {
+  musical:{name:'🎵 Musical'}, shapes:{name:'🔷 Shapes'}, pictures:{name:'🐶 Pictures'},
+  words:{name:'📖 Words'}, numbers:{name:'🔢 Numbers'}, wordpic:{name:'🧩 Word + Picture'}
+};
+let mode = 'pictures', pairs = 3;
+let deck = [], first = null, lock = false, moves = 0, found = 0;
+function bestKey() { return 'memoryBest_' + mode + '_' + pairs; }
+
+function buildDeck() {
+  const cards = [];
+  const add = (matchId, html, spoken) => cards.push({ matchId, html, spoken });
+  if (mode === 'pictures') {
+    shuffle(PICTURES.slice()).slice(0, pairs).forEach((e, i) => { add(i,'<span>'+e+'</span>'); add(i,'<span>'+e+'</span>'); });
+  } else if (mode === 'shapes') {
+    shuffle(SHAPES.slice()).slice(0, pairs).forEach((s, i) => {
+      const svg = '<svg viewBox="0 0 100 100">' + s[2].replace(/COL/g, s[1]) + '</svg>';
+      add(i, svg, s[0]); add(i, svg, s[0]);
+    });
+  } else if (mode === 'words') {
+    shuffle(WORDS.slice()).slice(0, pairs).forEach((w, i) => {
+      const html = '<span class="word">' + w + '</span>'; add(i, html, w); add(i, html, w);
+    });
+  } else if (mode === 'wordpic') {
+    shuffle(WORD_PICS.slice()).slice(0, pairs).forEach((p, i) => {
+      add(i, '<span class="word">'+p[0]+'</span>', p[0]); add(i, '<span>'+p[1]+'</span>', p[0]);
+    });
+  } else if (mode === 'numbers') {
+    shuffle([1,2,3,4,5,6,7,8,9,10]).slice(0, pairs).forEach((n, i) => {
+      add(i, '<span class="num">'+n+'</span>', String(n));
+      add(i, '<span class="dots">'+'⭐'.repeat(n)+'</span>', String(n));
+    });
+  } else if (mode === 'musical') {
+    shuffle([0,1,2,3,4,5,6,7,8,9]).slice(0, pairs).forEach((m) => {
+      add(m, '<span class="music">🎶</span>'); add(m, '<span class="music">🎶</span>');
+    });
+  }
+  return shuffle(cards);
+}
+function playMelody(i) { MELODIES[i].forEach((f, k) => tone(f, 0.28, k * 0.3, 'triangle', 0.3)); }
+
+function startGame() {
+  hideWin();
+  deck = buildDeck();
+  first = null; lock = false; moves = 0; found = 0;
+  document.getElementById('moves').textContent = '0';
+  document.getElementById('found').textContent = '0';
+  document.getElementById('total').textContent = pairs;
+  document.getElementById('game-title').textContent = MODE_INFO[mode].name;
+  const best = localStorage.getItem(bestKey());
+  document.getElementById('best-pill').style.display = best ? '' : 'none';
+  document.getElementById('best').textContent = best || '–';
+  const cols = pairs === 3 ? 3 : pairs === 6 ? 4 : 5;
+  const board = document.getElementById('board');
+  board.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+  board.style.maxWidth = Math.min(cols * 120, 640) + 'px';
+  board.innerHTML = '';
+  deck.forEach((c) => {
+    const b = document.createElement('button');
+    b.className = 'card';
+    b.setAttribute('aria-label', 'card');
+    b.innerHTML = '<div class="card-inner"><div class="face back">❓</div><div class="face front">' + c.html + '</div></div>';
+    b.addEventListener('click', () => flip(b, c));
+    board.appendChild(b);
+  });
+  show('game');
+}
+function flip(el, card) {
+  if (lock || el.classList.contains('flipped') || el.classList.contains('matched')) return;
+  audio();
+  el.classList.add('flipped');
+  sFlip();
+  if (mode === 'musical') playMelody(card.matchId);
+  else if (card.spoken) say(card.spoken);
+  if (!first) { first = { el, card }; return; }
+  moves++;
+  document.getElementById('moves').textContent = moves;
+  const a = first; first = null;
+  if (a.card.matchId === card.matchId && a.el !== el) {
+    lock = true;
+    const delay = mode === 'musical' ? 1000 : 450;
+    setTimeout(() => {
+      a.el.classList.add('matched'); el.classList.add('matched');
+      sMatch();
+      found++;
+      document.getElementById('found').textContent = found;
+      lock = false;
+      if (found === pairs) setTimeout(matchWin, 700);
+    }, delay);
+  } else {
+    lock = true;
+    const delay = mode === 'musical' ? 1400 : 950;
+    setTimeout(() => { el.classList.add('shake'); a.el.classList.add('shake'); sWrong(); }, delay - 400);
+    setTimeout(() => {
+      el.classList.remove('flipped','shake'); a.el.classList.remove('flipped','shake'); lock = false;
+    }, delay);
+  }
+}
+function matchWin() {
+  const great = Math.ceil(pairs * 1.5), good = Math.ceil(pairs * 2.5);
+  const stars = moves <= great ? 3 : moves <= good ? 2 : 1;
+  const key = bestKey(), prev = localStorage.getItem(key);
+  let bestMsg;
+  if (!prev || moves < parseInt(prev)) { localStorage.setItem(key, moves); bestMsg = '<p class="new-best">🏆 New best score!</p>'; }
+  else bestMsg = '<p>Your best: ' + prev + ' moves</p>';
+  say(stars === 3 ? 'Amazing! Three stars!' : 'Great job! You found all the pairs!');
+  showWin(stars, '<p>Finished in <b>' + moves + '</b> moves</p>' + bestMsg, startGame);
+}
+
+/* =====================================================
+   PART 2 — COPY ME (musical sequence, like Simon)
+   ===================================================== */
+const SEQ_TONES = [N.C4, N.E4, N.G4, N.C5];
+let sPat = [], sIn = [], sPlaying = false, sActive = false;
+
+function seqOpen() {
+  stopAll(); sActive = false; sPat = [];
+  document.getElementById('seq-level').textContent = '–';
+  document.getElementById('seq-best').textContent = localStorage.getItem('seqBest') || 0;
+  document.getElementById('seq-status').textContent = 'Watch the tiles, then copy the pattern!';
+  document.getElementById('seq-start').classList.remove('hidden');
+  seqDisable(true);
+  show('seq');
+}
+function seqDisable(d) { [0,1,2,3].forEach(i => document.getElementById('tile'+i).disabled = d); }
+function seqLight(i, dur) {
+  const t = document.getElementById('tile'+i);
+  t.classList.add('lit');
+  tone(SEQ_TONES[i], 0.4, 0, 'triangle', 0.3);
+  setTimeout(() => t.classList.remove('lit'), dur || 350);
+}
+function seqStart() {
+  audio(); stopAll();
+  sPat = []; sActive = true;
+  document.getElementById('seq-start').classList.add('hidden');
+  seqNext();
+}
+function seqNext() {
+  sIn = [];
+  sPat.push(Math.floor(Math.random() * 4));
+  document.getElementById('seq-level').textContent = sPat.length;
+  document.getElementById('seq-status').textContent = '👀 Watch…';
+  seqDisable(true);
+  sPlaying = true;
+  const speed = sPat.length > 6 ? 550 : 700;
+  sPat.forEach((t, k) => later(() => seqLight(t, speed * 0.55), 800 + k * speed));
+  later(() => {
+    sPlaying = false;
+    document.getElementById('seq-status').textContent = '🎹 Your turn!';
+    seqDisable(false);
+  }, 800 + sPat.length * speed);
+}
+function seqTap(i) {
+  if (sPlaying || !sActive) return;
+  seqLight(i, 250);
+  sIn.push(i);
+  const pos = sIn.length - 1;
+  if (sPat[pos] !== i) { // wrong!
+    sActive = false;
+    seqDisable(true);
+    sWrong();
+    const level = sPat.length - 1;
+    const prev = parseInt(localStorage.getItem('seqBest') || 0);
+    let bestMsg = '';
+    if (level > prev) { localStorage.setItem('seqBest', level); bestMsg = '<p class="new-best">🏆 New best!</p>'; }
+    document.getElementById('seq-best').textContent = Math.max(level, prev);
+    const stars = level >= 8 ? 3 : level >= 5 ? 2 : 1;
+    say(level >= 5 ? 'Wow, great listening!' : 'Good try! Play again!');
+    later(() => showWin(stars, '<p>You copied <b>' + level + '</b> pattern' + (level === 1 ? '' : 's') + '!</p>' + bestMsg,
+      () => { show('seq'); seqStart(); }, level >= 5 ? '🎉 Super ears!' : '🎵 Good try!'), 700);
+    document.getElementById('seq-start').classList.remove('hidden');
+    document.getElementById('seq-status').textContent = 'Press Start to play again';
+    return;
+  }
+  if (sIn.length === sPat.length) { // round complete
+    seqDisable(true);
+    document.getElementById('seq-status').textContent = '✅ Yes! One more…';
+    sMatch();
+    later(seqNext, 1100);
+  }
+}
+
+/* =====================================================
+   PART 3 — STORY TIME (listen, remember, answer)
+   ===================================================== */
+const STORIES = [
+  { t:'Tom and the Kite',
+    s:'Tom has a red kite. He flies the kite in the park. His dog Rex runs and barks. The kite goes up, up, up to the clouds!',
+    qs:[
+      { q:'What color is the kite?', o:['🟥 red','🟦 blue','🟩 green'], c:0 },
+      { q:'Who is Rex?', o:['🐶 a dog','🐱 a cat','🐦 a bird'], c:0 },
+      { q:'Where does Tom fly the kite?', o:['🏖️ the beach','🌳 the park','🏠 home'], c:1 },
+      { q:'Where does the kite go?', o:['🌲 in a tree','💧 in the water','☁️ to the clouds'], c:2 }
+    ]},
+  { t:"Mia's Cake",
+    s:"Mia bakes a cake with her mom. The cake is for Dad's birthday. Mia puts five candles on top. The cat licks the spoon!",
+    qs:[
+      { q:'Who helps Mia bake?', o:['👩 her mom','👴 grandpa','👨 her dad'], c:0 },
+      { q:'Whose birthday is it?', o:['🎂 Mia','🎂 Dad','🎂 the cat'], c:1 },
+      { q:'How many candles?', o:['3️⃣ three','5️⃣ five','7️⃣ seven'], c:1 },
+      { q:'Who licks the spoon?', o:['🐱 the cat','🐶 the dog','👧 Mia'], c:0 }
+    ]},
+  { t:'The Little Frog',
+    s:'A little frog sits on a rock. He is green with big eyes. He jumps into the pond. Splash! He swims to his three frog friends.',
+    qs:[
+      { q:'What color is the frog?', o:['🟩 green','🟦 blue','🟥 red'], c:0 },
+      { q:'Where does the frog sit?', o:['🌸 a flower','🪨 a rock','🍃 a leaf'], c:1 },
+      { q:'Where does he jump?', o:['💦 the pond','🛏️ his bed','🌳 a tree'], c:0 },
+      { q:'How many frog friends?', o:['2️⃣ two','3️⃣ three','4️⃣ four'], c:1 }
+    ]},
+  { t:'Ben at the Zoo',
+    s:"Ben goes to the zoo with Grandpa. He sees a big gray elephant. A cheeky monkey steals Ben's banana! Ben laughs and laughs.",
+    qs:[
+      { q:'Who goes with Ben?', o:['👴 Grandpa','👩 Mom','👦 his friend'], c:0 },
+      { q:'Which animal is gray?', o:['🐵 the monkey','🐘 the elephant','🦁 the lion'], c:1 },
+      { q:'What does the monkey steal?', o:['🍌 a banana','🍎 an apple','🧢 a hat'], c:0 },
+      { q:'What does Ben do?', o:['😭 cries','😴 sleeps','😂 laughs'], c:2 }
+    ]},
+  { t:'The Snowy Day',
+    s:'It snows all night. Lily makes a snowman with a carrot nose. She gives him her blue hat. In the sun, the snowman melts.',
+    qs:[
+      { q:"What is the snowman's nose?", o:['🥕 a carrot','🪨 a stone','🌿 a stick'], c:0 },
+      { q:'What color is the hat?', o:['🟥 red','🟦 blue','🟨 yellow'], c:1 },
+      { q:'What does Lily make?', o:['⛄ a snowman','🏰 a castle','🎂 a cake'], c:0 },
+      { q:'What happens in the sun?', o:['🕺 he dances','💧 he melts','😴 he sleeps'], c:1 }
+    ]}
+];
+let stQCount = 2, stStory = null, stQs = [], stIdx = 0, stScore = 0;
+
+function storyDiff(n, el) { stQCount = n; chipSelect(el); storyOpen(); }
+function storyOpen() {
+  stopAll(); hideWin();
+  stStory = STORIES[Math.floor(Math.random() * STORIES.length)];
+  document.getElementById('story-title').textContent = stStory.t;
+  document.getElementById('story-text').textContent = stStory.s;
+  document.getElementById('story-read').classList.remove('hidden');
+  document.getElementById('story-q').classList.add('hidden');
+  show('story');
+  later(() => readStory(), 500);
+}
+function readStory() { say(stStory.t + '. ' + stStory.s); }
+function storyQuiz() {
+  stopSay();
+  stQs = shuffle(stStory.qs.slice()).slice(0, stQCount);
+  stIdx = 0; stScore = 0;
+  document.getElementById('story-read').classList.add('hidden');
+  document.getElementById('story-q').classList.remove('hidden');
+  storyShowQ();
+}
+function storyShowQ() {
+  const q = stQs[stIdx];
+  document.getElementById('story-question').textContent = q.q;
+  document.getElementById('story-prog').textContent = 'Question ' + (stIdx + 1) + ' of ' + stQs.length;
+  const box = document.getElementById('story-opts');
+  box.innerHTML = '';
+  const order = shuffle(q.o.map((t, i) => ({ t, ok: i === q.c })));
+  order.forEach((opt) => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn'; b.textContent = opt.t;
+    b.onclick = () => storyAnswer(b, opt.ok, order);
+    box.appendChild(b);
+  });
+  say(q.q);
+}
+function storyAnswer(btn, ok, order) {
+  document.querySelectorAll('#story-opts .opt-btn').forEach((b, i) => {
+    b.disabled = true;
+    if (order[i].ok) b.classList.add('right');
+  });
+  if (ok) { stScore++; sMatch(); } else { btn.classList.add('wrong'); sWrong(); }
+  later(() => {
+    stIdx++;
+    if (stIdx < stQs.length) storyShowQ();
+    else {
+      const stars = stScore === stQs.length ? 3 : stScore >= Math.ceil(stQs.length / 2) ? 2 : 1;
+      say(stars === 3 ? 'Perfect! You remembered everything!' : 'Good listening! Try another story!');
+      showWin(stars, '<p>You got <b>' + stScore + ' of ' + stQs.length + '</b> right!</p>', storyOpen, '📚 Story finished!');
+    }
+  }, 1200);
+}
+
+/* =====================================================
+   PART 4 — WHO IS IT? (friends & names)
+   ===================================================== */
+const FRIENDS = [
+  ['Max','🐵','#fde68a'], ['Rosie','🐰','#fbcfe8'], ['Bruno','🐻','#fcd34d'],
+  ['Pip','🐸','#bbf7d0'], ['Oli','🦉','#ddd6fe'], ['Momo','🐱','#fed7aa'], ['Buddy','🐶','#bfdbfe']
+];
+const FACTS = ['loves jam','can hop high','naps a lot','sings songs','reads books','chases yarn','digs holes'];
+let fCount = 3, fSet = [], fIdx = 0, fScore = 0;
+
+function facesDiff(n, el) { fCount = n; chipSelect(el); facesOpen(); }
+function facesOpen() {
+  stopAll(); hideWin();
+  fSet = shuffle(FRIENDS.slice()).slice(0, fCount).map((f, i) => ({ name:f[0], face:f[1], bg:f[2], fact:FACTS[i] }));
+  const grid = document.getElementById('friends-grid');
+  grid.innerHTML = '';
+  fSet.forEach((f) => {
+    const d = document.createElement('div');
+    d.className = 'friend-card';
+    d.innerHTML = '<div class="friend-face" style="background:' + f.bg + '">' + f.face + '</div>' +
+      '<div class="friend-name">' + f.name + '</div><div class="friend-fact">' + f.fact + '</div>';
+    d.onclick = () => say('This is ' + f.name + '. ' + f.name + ' ' + f.fact + '.');
+    grid.appendChild(d);
+  });
+  document.getElementById('faces-study').classList.remove('hidden');
+  document.getElementById('faces-q').classList.add('hidden');
+  show('faces');
+  later(() => say('Meet your new friends! Tap each friend to hear their name.'), 400);
+}
+function facesQuiz() {
+  stopSay();
+  fSet = shuffle(fSet);
+  fIdx = 0; fScore = 0;
+  document.getElementById('faces-study').classList.add('hidden');
+  document.getElementById('faces-q').classList.remove('hidden');
+  facesShowQ();
+}
+function facesShowQ() {
+  const p = fSet[fIdx];
+  const qf = document.getElementById('quiz-face');
+  qf.textContent = p.face; qf.style.background = p.bg;
+  document.getElementById('faces-prog').textContent = 'Friend ' + (fIdx + 1) + ' of ' + fSet.length;
+  let names = fSet.map(f => f.name);
+  if (names.length > 4) names = shuffle(names.filter(n => n !== p.name)).slice(0, 3).concat(p.name);
+  names = shuffle(names.slice());
+  const box = document.getElementById('faces-opts');
+  box.innerHTML = '';
+  names.forEach((n) => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn'; b.textContent = n;
+    b.onclick = () => facesAnswer(b, n === p.name, p.name);
+    box.appendChild(b);
+  });
+  say('Who is this?');
+}
+function facesAnswer(btn, ok, correctName) {
+  document.querySelectorAll('#faces-opts .opt-btn').forEach((b) => {
+    b.disabled = true;
+    if (b.textContent === correctName) b.classList.add('right');
+  });
+  if (ok) { fScore++; sMatch(); say('Yes! It\'s ' + correctName + '!'); }
+  else { btn.classList.add('wrong'); sWrong(); say('It\'s ' + correctName + '.'); }
+  later(() => {
+    fIdx++;
+    if (fIdx < fSet.length) facesShowQ();
+    else {
+      const stars = fScore === fSet.length ? 3 : fScore >= Math.ceil(fSet.length * 2 / 3) ? 2 : 1;
+      showWin(stars, '<p>You knew <b>' + fScore + ' of ' + fSet.length + '</b> friends!</p>', facesOpen, '🤗 All done!');
+    }
+  }, 1400);
+}
+
+/* =====================================================
+   PART 5 — WHAT'S MISSING? (look, then spot the gone one)
+   ===================================================== */
+const THINGS = ['🍎','🍌','🚗','⚽','🧸','🌟','🐟','🎈','🍪','🦆','🪁','🖍️','🍓','🚀','🌈','🎁'];
+let mCount = 4, mRound = 0, mScore = 0, mShown = [], mMiss = '';
+
+function missDiff(n, el) { mCount = n; chipSelect(el); missOpen(); }
+function missOpen() { stopAll(); hideWin(); show('missing'); missStart(); }
+function missStart() {
+  stopAll();
+  mRound = 0; mScore = 0;
+  document.getElementById('miss-score').textContent = '0';
+  document.getElementById('miss-start').classList.add('hidden');
+  missRound();
+}
+function missRound() {
+  mRound++;
+  document.getElementById('miss-round').textContent = mRound;
+  mShown = shuffle(THINGS.slice()).slice(0, mCount);
+  document.getElementById('miss-look').classList.remove('hidden');
+  document.getElementById('miss-ask').classList.add('hidden');
+  document.getElementById('miss-items').innerHTML = mShown.map(e => '<span class="item">' + e + '</span>').join('');
+  say('Look carefully!');
+  let secs = mCount <= 4 ? 5 : mCount <= 6 ? 7 : 9;
+  const cd = document.getElementById('miss-count');
+  cd.textContent = secs;
+  const iv = setInterval(() => {
+    secs--;
+    cd.textContent = secs > 0 ? secs : '👀';
+    if (secs <= 0) { clearInterval(iv); missAsk(); }
+  }, 1000);
+  timers.push(iv);
+}
+function missAsk() {
+  mMiss = mShown[Math.floor(Math.random() * mShown.length)];
+  const left = shuffle(mShown.filter(e => e !== mMiss));
+  document.getElementById('miss-look').classList.add('hidden');
+  document.getElementById('miss-ask').classList.remove('hidden');
+  document.getElementById('miss-left').innerHTML = left.map(e => '<span class="item">' + e + '</span>').join('');
+  const decoys = shuffle(THINGS.filter(e => !mShown.includes(e))).slice(0, 2);
+  const opts = shuffle([mMiss].concat(decoys));
+  const box = document.getElementById('miss-opts');
+  box.innerHTML = '';
+  opts.forEach((e) => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn'; b.textContent = e;
+    b.onclick = () => missAnswer(b, e === mMiss);
+    box.appendChild(b);
+  });
+  say("One thing is gone! What's missing?");
+}
+function missAnswer(btn, ok) {
+  document.querySelectorAll('#miss-opts .opt-btn').forEach((b) => {
+    b.disabled = true;
+    if (b.textContent === mMiss) b.classList.add('right');
+  });
+  if (ok) { mScore++; sMatch(); } else { btn.classList.add('wrong'); sWrong(); }
+  document.getElementById('miss-score').textContent = mScore;
+  later(() => {
+    if (mRound < 5) missRound();
+    else {
+      const stars = mScore >= 5 ? 3 : mScore >= 3 ? 2 : 1;
+      say(stars === 3 ? 'Wow! Eagle eyes!' : 'Good looking! Play again!');
+      document.getElementById('miss-start').classList.remove('hidden');
+      showWin(stars, '<p>You spotted <b>' + mScore + ' of 5</b>!</p>', missStart, '👀 Sharp eyes!');
+    }
+  }, 1300);
+}
+
+/* =====================================================
+   NAVIGATION
+   ===================================================== */
+document.querySelectorAll('.mode-btn[data-mode]').forEach(b =>
   b.addEventListener('click', () => {
     mode = b.dataset.mode;
     document.getElementById('diff-title').textContent = MODE_INFO[mode].name;
@@ -446,6 +908,15 @@ document.querySelectorAll('.mode-btn').forEach(b =>
   }));
 document.querySelectorAll('.diff-btn').forEach(b =>
   b.addEventListener('click', () => { pairs = parseInt(b.dataset.pairs); startGame(); }));
+document.querySelectorAll('.mode-btn[data-game]').forEach(b =>
+  b.addEventListener('click', () => {
+    audio();
+    const g = b.dataset.game;
+    if (g === 'seq') seqOpen();
+    else if (g === 'story') storyOpen();
+    else if (g === 'faces') facesOpen();
+    else if (g === 'missing') missOpen();
+  }));
 
 // ---------- PWA service worker ----------
 if ('serviceWorker' in navigator) {
