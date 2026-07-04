@@ -1,30 +1,32 @@
 # 🧠 Memory Fun!
 
-A fun and educational memory game for kids aged 5–10. Six game modes, three difficulty levels, sounds, spoken words, and a confetti celebration when you win!
+Memory and brain-training games for kids aged 6–10. Ten games, each with Easy / Medium / Hard levels, sounds, best scores, and a confetti celebration.
 
 ## Game modes
 
-**Matching games** (flip cards, find the pairs — Easy 6 / Medium 12 / Hard 20 cards):
+**Matching games** (flip cards, find the pairs — 6 / 12 / 20 cards):
 
 | Mode | What kids practice |
 |---|---|
-| 🎵 Musical | Listening — cards look the same, match them by their tune |
-| 🔷 Shapes | Shape and color recognition |
-| 🐶 Pictures | Visual memory with animals |
-| 📖 Words | Reading easy words (the game reads them aloud!) |
-| 🔢 Numbers | Counting — match the number to the right amount of stars |
-| 🧩 Word + Picture | Early reading — match the word "cat" to 🐱 |
+| 🎵 Musical | Auditory memory — cards look identical, match them by their tune |
+| 🐶 Pictures | Visual memory |
+| 📖 Words | Reading and word memory |
 
-**Brain games** (different kinds of memory, not just matching):
+**Brain games** (based on classic cognitive-training tasks):
 
 | Mode | What kids practice |
 |---|---|
-| 🎹 Copy Me | Repeat a growing musical pattern on 4 colorful animal tiles |
-| 📚 Story Time | Listen to a short story read aloud, then answer picture questions |
-| 🤗 Who Is It? | Meet animal friends with names, then remember who is who |
-| 👀 What's Missing? | Study a group of things, then spot which one disappeared |
+| 🎹 Copy Me | Repeat a growing pattern on 4 colored tiles (Simon) — attention & sequencing |
+| 🔢 Number Recall | Digit span — the classic working-memory task; Hard mode is backwards! |
+| 🟨 Grid Memory | Corsi block-tapping — spatial working memory on a 3×3 or 4×4 grid |
+| 📚 Story Time | Read a detailed story, then answer questions about names, numbers, and details |
+| 🤝 Who Is It? | Remember kids' names AND facts about them ("Who has a parrot named Kiwi?") |
+| 👀 What's Missing? | Study a group of things, spot which one disappeared — visual attention |
+| 🕵️ Odd One Out | Which one doesn't belong? — categorization and logical reasoning |
 
-Everything is read aloud for early readers, answers are big tap buttons (no typing), and best scores are saved on the device.
+Research on working-memory training in children suggests short daily practice (5–10 minutes) over several weeks is what makes a difference — Number Recall, Grid Memory, and Copy Me are game versions of the tasks used in those studies.
+
+Answers are big tap buttons (no typing), stories can be read aloud, and best scores are saved on the device per game and level.
 
 ## How to publish it with GitHub Desktop
 

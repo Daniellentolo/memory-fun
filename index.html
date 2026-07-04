@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Memory Fun!</title>
-<meta name="description" content="A fun memory game for kids: matching, music, stories, friends and more!">
+<meta name="description" content="Memory and brain games for kids 6-10: matching, sequences, stories, logic and more!">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
@@ -28,8 +28,7 @@
   .screen.active { display:block; }
 
   /* ============ MENU ============ */
-  h1.title { text-align:center; font-size:clamp(2rem,8vw,3rem); margin:10px 0 4px;
-    text-shadow:0 3px 0 rgba(0,0,0,.25); }
+  h1.title { text-align:center; font-size:clamp(2rem,8vw,3rem); margin:10px 0 4px; text-shadow:0 3px 0 rgba(0,0,0,.25); }
   .subtitle { text-align:center; font-size:1.1rem; opacity:.9; margin-bottom:18px; }
   .section-label { font-size:1.05rem; margin:18px 4px 10px; opacity:.9; text-shadow:0 2px 0 rgba(0,0,0,.2); }
   .mode-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
@@ -42,11 +41,10 @@
   .mode-btn:active { transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,.22); }
   .mode-btn .big { font-size:2.4rem; line-height:1; }
   .mode-btn small { font-weight:normal; font-size:.78rem; opacity:.92; }
-  .m-musical { background:#ec4899; } .m-shapes { background:#f59e0b; }
-  .m-pictures { background:#22c55e; } .m-words { background:#3b82f6; }
-  .m-numbers { background:#8b5cf6; } .m-wordpic { background:#ef4444; }
+  .m-musical { background:#ec4899; } .m-pictures { background:#22c55e; } .m-words { background:#3b82f6; }
   .m-seq { background:#0ea5e9; } .m-story { background:#16a34a; }
   .m-faces { background:#f97316; } .m-missing { background:#d946ef; }
+  .m-digits { background:#8b5cf6; } .m-grid { background:#f59e0b; } .m-odd { background:#ef4444; }
 
   /* ============ DIFFICULTY ============ */
   .diff-wrap { display:flex; flex-direction:column; gap:16px; margin-top:30px; }
@@ -67,16 +65,7 @@
   .screen-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
   .screen-head h2 { font-size:1.3rem; text-shadow:0 2px 0 rgba(0,0,0,.2); text-align:center; flex:1; }
 
-  /* small difficulty chips used inside brain games */
-  .chip-row { display:flex; justify-content:center; gap:8px; margin:6px 0 14px; flex-wrap:wrap; }
-  .chip {
-    border:2px solid rgba(255,255,255,.6); background:rgba(255,255,255,.15); color:#fff;
-    font-family:inherit; font-weight:bold; font-size:.85rem; padding:7px 14px;
-    border-radius:999px; cursor:pointer;
-  }
-  .chip.active { background:#fff; color:#7c3aed; }
-
-  /* ============ MATCHING GAME ============ */
+  /* ============ MATCHING ============ */
   .hud { display:flex; justify-content:center; gap:12px; margin:8px 0 16px; flex-wrap:wrap; }
   .hud .pill { background:rgba(255,255,255,.22); border-radius:999px; padding:8px 16px; font-size:1rem; font-weight:bold; }
   .board { display:grid; gap:10px; justify-content:center; margin:0 auto; }
@@ -100,9 +89,6 @@
   .card.shake .card-inner { animation:cardshake .4s; }
   @keyframes cardshake { 0%,100%{transform:rotateY(180deg) translateX(0)} 25%{transform:rotateY(180deg) translateX(-6px)} 75%{transform:rotateY(180deg) translateX(6px)} }
   .face.front .word { font-size:clamp(1rem,4.5vw,1.6rem); font-weight:bold; color:#3b82f6; text-align:center; }
-  .face.front .num { font-size:clamp(1.8rem,8vw,3rem); font-weight:bold; color:#8b5cf6; }
-  .face.front .dots { font-size:clamp(.75rem,3vw,1.1rem); line-height:1.25; text-align:center; word-break:break-all; padding:2px; }
-  .face.front svg { width:70%; height:70%; }
   .face.front .music { font-size:clamp(1.6rem,7vw,2.6rem); }
 
   /* ============ SEQUENCE (Copy Me) ============ */
@@ -110,15 +96,15 @@
   .seq-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; max-width:320px; margin:10px auto; }
   .seq-tile {
     height:120px; border-radius:22px; border:5px solid rgba(255,255,255,.85); cursor:pointer;
-    font-size:2.4rem; box-shadow:0 6px 14px rgba(0,0,0,.25); transition:transform .1s, filter .1s;
+    box-shadow:0 6px 14px rgba(0,0,0,.25); transition:transform .1s, filter .1s;
     touch-action:manipulation;
   }
   .seq-tile:disabled { cursor:default; opacity:.92; }
-  .seq-tile.lit { filter:brightness(1.6); transform:scale(1.07); }
+  .seq-tile.lit { filter:brightness(1.65); transform:scale(1.07); }
   .seq-tile:active:not(:disabled) { transform:scale(.95); }
   .t-red { background:#ef4444; } .t-blue { background:#3b82f6; }
   .t-green { background:#22c55e; } .t-yellow { background:#facc15; }
-  .center-row { display:flex; justify-content:center; gap:10px; margin-top:16px; }
+  .center-row { display:flex; justify-content:center; gap:10px; margin-top:16px; flex-wrap:wrap; }
   .big-btn {
     border:none; border-radius:18px; padding:14px 28px; font-family:inherit; font-size:1.15rem;
     font-weight:bold; color:#fff; background:#22c55e; cursor:pointer; box-shadow:0 5px 0 rgba(0,0,0,.22);
@@ -126,35 +112,36 @@
   .big-btn:active { transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.22); }
   .big-btn.alt { background:#f59e0b; }
 
-  /* ============ STORY / QUIZ shared ============ */
+  /* ============ PANEL / QUIZ shared ============ */
   .panel {
     background:rgba(255,255,255,.95); color:#333; border-radius:22px; padding:20px 18px;
-    box-shadow:0 6px 20px rgba(0,0,0,.25); margin:0 auto; max-width:560px;
+    box-shadow:0 6px 20px rgba(0,0,0,.25); margin:0 auto; max-width:600px;
   }
   .panel h3 { color:#7c3aed; font-size:1.25rem; margin-bottom:10px; text-align:center; }
-  .story-text { font-size:1.25rem; line-height:1.9; color:#374151; }
-  .q-text { font-size:1.25rem; font-weight:bold; color:#374151; text-align:center; margin:8px 0 16px; }
+  .story-text { font-size:1.08rem; line-height:1.85; color:#374151; }
+  .q-text { font-size:1.2rem; font-weight:bold; color:#374151; text-align:center; margin:8px 0 16px; }
   .opts { display:flex; flex-direction:column; gap:10px; }
   .opt-btn {
     border:3px solid #c4b5fd; background:#f5f3ff; color:#4c1d95; border-radius:16px;
-    padding:14px; font-family:inherit; font-size:1.15rem; font-weight:bold; cursor:pointer;
+    padding:13px; font-family:inherit; font-size:1.08rem; font-weight:bold; cursor:pointer;
     transition:transform .1s; touch-action:manipulation;
   }
   .opt-btn:active { transform:scale(.97); }
   .opt-btn.right { background:#dcfce7; border-color:#22c55e; color:#166534; }
   .opt-btn.wrong { background:#fee2e2; border-color:#ef4444; color:#991b1b; }
   .progress-txt { text-align:center; margin-top:12px; color:#6b7280; font-size:.9rem; }
+  .why-txt { text-align:center; margin-top:12px; color:#7c3aed; font-size:1rem; font-weight:bold; min-height:1.4em; }
 
-  /* ============ FRIENDS (faces & names) ============ */
-  .friends-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:10px; margin:8px 0; }
+  /* ============ WHO IS IT ============ */
+  .friends-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; margin:8px 0; }
   .friend-card {
-    background:#fff; border:3px solid #e9d5ff; border-radius:18px; padding:12px 6px 10px;
+    background:#fff; border:3px solid #e9d5ff; border-radius:18px; padding:12px 8px 10px;
     text-align:center; cursor:pointer; transition:transform .1s;
   }
-  .friend-card:active { transform:scale(.95); }
+  .friend-card:active { transform:scale(.96); }
   .friend-face { width:62px; height:62px; border-radius:50%; margin:0 auto 6px; display:flex; align-items:center; justify-content:center; font-size:2rem; }
-  .friend-name { font-weight:bold; color:#7c3aed; font-size:1rem; }
-  .friend-fact { font-size:.72rem; color:#6b7280; margin-top:2px; }
+  .friend-name { font-weight:bold; color:#7c3aed; font-size:1.05rem; }
+  .friend-fact { font-size:.76rem; color:#6b7280; margin-top:3px; line-height:1.5; }
   .quiz-face { width:110px; height:110px; border-radius:50%; margin:4px auto 12px; display:flex; align-items:center; justify-content:center; font-size:3.4rem; border:5px solid #e9d5ff; }
 
   /* ============ WHAT'S MISSING ============ */
@@ -162,9 +149,37 @@
   .item { font-size:clamp(2.4rem,10vw,3.4rem); animation:popIn .3s ease; }
   @keyframes popIn { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
   .items-grid.small .item { font-size:2rem; }
-  .count-big { text-align:center; font-size:2.2rem; font-weight:bold; text-shadow:0 3px 0 rgba(0,0,0,.25); }
-  .opts.emoji-opts { flex-direction:row; justify-content:center; }
+  .count-big { text-align:center; font-size:2.2rem; font-weight:bold; color:#7c3aed; }
+  .opts.emoji-opts { flex-direction:row; justify-content:center; flex-wrap:wrap; }
   .opts.emoji-opts .opt-btn { font-size:2.2rem; padding:12px 20px; }
+
+  /* ============ NUMBER RECALL ============ */
+  .digit-show {
+    text-align:center; font-size:clamp(4rem,20vw,6rem); font-weight:bold; min-height:1.3em;
+    text-shadow:0 4px 0 rgba(0,0,0,.25); letter-spacing:.05em;
+  }
+  .digit-entered { text-align:center; font-size:1.6rem; letter-spacing:8px; min-height:1.5em; margin:6px 0; font-weight:bold; }
+  .keypad { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; max-width:400px; margin:10px auto; }
+  .key-btn {
+    border:none; border-radius:16px; padding:16px 0; font-family:inherit; font-size:1.5rem;
+    font-weight:bold; color:#7c3aed; background:#fff; cursor:pointer;
+    box-shadow:0 4px 0 rgba(0,0,0,.22); touch-action:manipulation;
+  }
+  .key-btn:active { transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.22); }
+  .key-btn:disabled { opacity:.5; cursor:default; }
+
+  /* ============ GRID MEMORY ============ */
+  .mem-grid { display:grid; gap:10px; max-width:340px; margin:12px auto; }
+  .mem-cell {
+    aspect-ratio:1; border-radius:16px; border:4px solid rgba(255,255,255,.8);
+    background:#6d28d9; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,.25);
+    transition:transform .1s, filter .1s, background .15s; touch-action:manipulation;
+  }
+  .mem-cell.lit { background:#fbbf24; filter:brightness(1.2); transform:scale(1.06); }
+  .mem-cell.good { background:#22c55e; }
+  .mem-cell.bad { background:#ef4444; }
+  .mem-cell:active:not(:disabled) { transform:scale(.94); }
+  .mem-cell:disabled { cursor:default; }
 
   /* ============ WIN ============ */
   #win { position:fixed; inset:0; background:rgba(30,10,60,.75); display:none; align-items:center; justify-content:center; z-index:50; padding:20px; }
@@ -198,29 +213,29 @@
 <!-- ============ MENU ============ -->
 <section id="menu" class="screen active">
   <h1 class="title">🧠 Memory Fun!</h1>
-  <p class="subtitle">Pick a game and play!</p>
+  <p class="subtitle">Train your brain — pick a game!</p>
 
   <div class="section-label">🃏 Matching Games</div>
   <div class="mode-grid">
-    <button class="mode-btn m-musical" data-mode="musical"><span class="big">🎵</span>Musical<small>Match the tunes</small></button>
-    <button class="mode-btn m-shapes" data-mode="shapes"><span class="big">🔷</span>Shapes<small>Match the shapes</small></button>
+    <button class="mode-btn m-musical" data-mode="musical"><span class="big">🎵</span>Musical<small>Match the tunes by ear</small></button>
     <button class="mode-btn m-pictures" data-mode="pictures"><span class="big">🐶</span>Pictures<small>Match the animals</small></button>
-    <button class="mode-btn m-words" data-mode="words"><span class="big">📖</span>Words<small>Match easy words</small></button>
-    <button class="mode-btn m-numbers" data-mode="numbers"><span class="big">🔢</span>Numbers<small>Count the stars</small></button>
-    <button class="mode-btn m-wordpic" data-mode="wordpic"><span class="big">🧩</span>Word + Picture<small>Read and match</small></button>
+    <button class="mode-btn m-words" data-mode="words"><span class="big">📖</span>Words<small>Match the words</small></button>
   </div>
 
   <div class="section-label">🧠 Brain Games</div>
   <div class="mode-grid">
-    <button class="mode-btn m-seq" data-game="seq"><span class="big">🎹</span>Copy Me<small>Repeat the musical pattern</small></button>
-    <button class="mode-btn m-story" data-game="story"><span class="big">📚</span>Story Time<small>Listen and remember</small></button>
-    <button class="mode-btn m-faces" data-game="faces"><span class="big">🤗</span>Who Is It?<small>Remember your new friends</small></button>
+    <button class="mode-btn m-seq" data-game="seq"><span class="big">🎹</span>Copy Me<small>Repeat the growing pattern</small></button>
+    <button class="mode-btn m-digits" data-game="digits"><span class="big">🔢</span>Number Recall<small>Remember number sequences</small></button>
+    <button class="mode-btn m-grid" data-game="grid"><span class="big">🟨</span>Grid Memory<small>Remember where lights flash</small></button>
+    <button class="mode-btn m-story" data-game="story"><span class="big">📚</span>Story Time<small>Read, remember the details</small></button>
+    <button class="mode-btn m-faces" data-game="faces"><span class="big">🤝</span>Who Is It?<small>Remember people and facts</small></button>
     <button class="mode-btn m-missing" data-game="missing"><span class="big">👀</span>What's Missing?<small>Spot what disappeared</small></button>
+    <button class="mode-btn m-odd" data-game="odd"><span class="big">🕵️</span>Odd One Out<small>Which one doesn't belong?</small></button>
   </div>
   <footer class="credit">Made with ❤️ for curious kids</footer>
 </section>
 
-<!-- ============ MATCHING: DIFFICULTY ============ -->
+<!-- ============ DIFFICULTY (shared by all games) ============ -->
 <section id="diff" class="screen">
   <div class="screen-head">
     <button class="back-btn" onclick="show('menu')">⬅ Back</button>
@@ -228,13 +243,13 @@
     <span style="width:70px"></span>
   </div>
   <div class="diff-wrap">
-    <button class="diff-btn d-easy" data-pairs="3">😊 Easy<small>6 cards</small></button>
-    <button class="diff-btn d-medium" data-pairs="6">🤔 Medium<small>12 cards</small></button>
-    <button class="diff-btn d-hard" data-pairs="10">🤯 Hard<small>20 cards</small></button>
+    <button class="diff-btn d-easy" onclick="launch(0)">😊 Easy<small id="dl0"></small></button>
+    <button class="diff-btn d-medium" onclick="launch(1)">🤔 Medium<small id="dl1"></small></button>
+    <button class="diff-btn d-hard" onclick="launch(2)">🤯 Hard<small id="dl2"></small></button>
   </div>
 </section>
 
-<!-- ============ MATCHING: GAME ============ -->
+<!-- ============ MATCHING GAME ============ -->
 <section id="game" class="screen">
   <div class="screen-head">
     <button class="back-btn" onclick="show('diff')">⬅ Back</button>
@@ -249,10 +264,10 @@
   <div id="board" class="board"></div>
 </section>
 
-<!-- ============ COPY ME (sequence) ============ -->
+<!-- ============ COPY ME ============ -->
 <section id="seq" class="screen">
   <div class="screen-head">
-    <button class="back-btn" onclick="stopAll();show('menu')">⬅ Back</button>
+    <button class="back-btn" onclick="stopAll();show('diff')">⬅ Back</button>
     <h2>🎹 Copy Me</h2>
     <span style="width:70px"></span>
   </div>
@@ -260,27 +275,56 @@
     <span class="pill">Level: <span id="seq-level">–</span></span>
     <span class="pill">Best: <span id="seq-best">0</span></span>
   </div>
-  <div class="seq-status" id="seq-status">Watch the tiles, then copy the pattern!</div>
+  <div class="seq-status" id="seq-status">Watch the pattern, then repeat it!</div>
   <div class="seq-grid">
-    <button class="seq-tile t-red" id="tile0" disabled onclick="seqTap(0)">🐘</button>
-    <button class="seq-tile t-blue" id="tile1" disabled onclick="seqTap(1)">🐬</button>
-    <button class="seq-tile t-green" id="tile2" disabled onclick="seqTap(2)">🐸</button>
-    <button class="seq-tile t-yellow" id="tile3" disabled onclick="seqTap(3)">🐥</button>
+    <button class="seq-tile t-red" id="tile0" disabled onclick="seqTap(0)"></button>
+    <button class="seq-tile t-blue" id="tile1" disabled onclick="seqTap(1)"></button>
+    <button class="seq-tile t-green" id="tile2" disabled onclick="seqTap(2)"></button>
+    <button class="seq-tile t-yellow" id="tile3" disabled onclick="seqTap(3)"></button>
   </div>
-  <div class="center-row"><button class="big-btn" id="seq-start" onclick="seqStart()">▶ Start</button></div>
+  <div class="center-row"><button class="big-btn" id="seq-start" onclick="seqRun()">▶ Start</button></div>
+</section>
+
+<!-- ============ NUMBER RECALL ============ -->
+<section id="digits" class="screen">
+  <div class="screen-head">
+    <button class="back-btn" onclick="stopAll();show('diff')">⬅ Back</button>
+    <h2>🔢 Number Recall</h2>
+    <span style="width:70px"></span>
+  </div>
+  <div class="hud">
+    <span class="pill">Length: <span id="dig-level">–</span></span>
+    <span class="pill">Best: <span id="dig-best">0</span></span>
+  </div>
+  <div class="seq-status" id="dig-status">Remember the numbers!</div>
+  <div class="digit-show" id="dig-show"></div>
+  <div class="digit-entered" id="dig-entered"></div>
+  <div class="keypad hidden" id="keypad"></div>
+  <div class="center-row"><button class="big-btn" id="dig-start" onclick="digRun()">▶ Start</button></div>
+</section>
+
+<!-- ============ GRID MEMORY ============ -->
+<section id="grid" class="screen">
+  <div class="screen-head">
+    <button class="back-btn" onclick="stopAll();show('diff')">⬅ Back</button>
+    <h2>🟨 Grid Memory</h2>
+    <span style="width:70px"></span>
+  </div>
+  <div class="hud">
+    <span class="pill">Length: <span id="grid-level">–</span></span>
+    <span class="pill">Best: <span id="grid-best">0</span></span>
+  </div>
+  <div class="seq-status" id="grid-status">Watch the flashes, then tap them in order!</div>
+  <div class="mem-grid" id="mem-grid"></div>
+  <div class="center-row"><button class="big-btn" id="grid-start" onclick="gridRun()">▶ Start</button></div>
 </section>
 
 <!-- ============ STORY TIME ============ -->
 <section id="story" class="screen">
   <div class="screen-head">
-    <button class="back-btn" onclick="stopAll();show('menu')">⬅ Back</button>
+    <button class="back-btn" onclick="stopAll();show('diff')">⬅ Back</button>
     <h2>📚 Story Time</h2>
     <span style="width:70px"></span>
-  </div>
-  <div class="chip-row">
-    <button class="chip active" data-stq="2" onclick="storyDiff(2,this)">😊 2 questions</button>
-    <button class="chip" data-stq="3" onclick="storyDiff(3,this)">🤔 3 questions</button>
-    <button class="chip" data-stq="4" onclick="storyDiff(4,this)">🤯 4 questions</button>
   </div>
   <div id="story-read" class="panel">
     <h3 id="story-title"></h3>
@@ -300,24 +344,18 @@
 <!-- ============ WHO IS IT? ============ -->
 <section id="faces" class="screen">
   <div class="screen-head">
-    <button class="back-btn" onclick="stopAll();show('menu')">⬅ Back</button>
-    <h2>🤗 Who Is It?</h2>
+    <button class="back-btn" onclick="stopAll();show('diff')">⬅ Back</button>
+    <h2>🤝 Who Is It?</h2>
     <span style="width:70px"></span>
   </div>
-  <div class="chip-row">
-    <button class="chip active" onclick="facesDiff(3,this)">😊 3 friends</button>
-    <button class="chip" onclick="facesDiff(5,this)">🤔 5 friends</button>
-    <button class="chip" onclick="facesDiff(7,this)">🤯 7 friends</button>
-  </div>
   <div id="faces-study" class="panel">
-    <h3>Meet your new friends! 👋</h3>
-    <p style="text-align:center;color:#6b7280;font-size:.9rem;margin-bottom:8px;">Tap a friend to hear their name</p>
+    <h3>Memorize these kids — names AND facts!</h3>
     <div class="friends-grid" id="friends-grid"></div>
     <div class="center-row"><button class="big-btn" onclick="facesQuiz()">Quiz me! ✨</button></div>
   </div>
   <div id="faces-q" class="panel hidden">
-    <p class="q-text">Who is this?</p>
-    <div class="quiz-face" id="quiz-face"></div>
+    <p class="q-text" id="faces-question"></p>
+    <div class="quiz-face hidden" id="quiz-face"></div>
     <div class="opts" id="faces-opts"></div>
     <p class="progress-txt" id="faces-prog"></p>
   </div>
@@ -326,14 +364,9 @@
 <!-- ============ WHAT'S MISSING? ============ -->
 <section id="missing" class="screen">
   <div class="screen-head">
-    <button class="back-btn" onclick="stopAll();show('menu')">⬅ Back</button>
+    <button class="back-btn" onclick="stopAll();show('diff')">⬅ Back</button>
     <h2>👀 What's Missing?</h2>
     <span style="width:70px"></span>
-  </div>
-  <div class="chip-row">
-    <button class="chip active" onclick="missDiff(4,this)">😊 4 things</button>
-    <button class="chip" onclick="missDiff(6,this)">🤔 6 things</button>
-    <button class="chip" onclick="missDiff(8,this)">🤯 8 things</button>
   </div>
   <div class="hud">
     <span class="pill">Round: <span id="miss-round">1</span>/5</span>
@@ -342,14 +375,31 @@
   <div id="miss-look" class="panel">
     <h3>Look carefully! 🔍</h3>
     <div class="items-grid" id="miss-items"></div>
-    <div class="count-big" id="miss-count" style="color:#7c3aed"></div>
+    <div class="count-big" id="miss-count"></div>
   </div>
   <div id="miss-ask" class="panel hidden">
     <p class="q-text">One thing is gone… what's missing?</p>
     <div class="items-grid small" id="miss-left"></div>
     <div class="opts emoji-opts" id="miss-opts"></div>
   </div>
-  <div class="center-row"><button class="big-btn hidden" id="miss-start" onclick="missStart()">▶ Play again</button></div>
+</section>
+
+<!-- ============ ODD ONE OUT ============ -->
+<section id="odd" class="screen">
+  <div class="screen-head">
+    <button class="back-btn" onclick="stopAll();show('diff')">⬅ Back</button>
+    <h2>🕵️ Odd One Out</h2>
+    <span style="width:70px"></span>
+  </div>
+  <div class="hud">
+    <span class="pill">Round: <span id="odd-round">1</span>/5</span>
+    <span class="pill">Score: <span id="odd-score">0</span></span>
+  </div>
+  <div class="panel">
+    <p class="q-text">Which one does NOT belong?</p>
+    <div class="opts emoji-opts" id="odd-opts"></div>
+    <p class="why-txt" id="odd-why"></p>
+  </div>
 </section>
 
 <!-- ============ WIN OVERLAY ============ -->
@@ -367,9 +417,11 @@
 
 <script>
 /* =====================================================
-   MEMORY FUN! — memory games for kids 5–10
-   Matching: musical, shapes, pictures, words, numbers, word+picture
-   Brain games: Copy Me, Story Time, Who Is It?, What's Missing?
+   MEMORY FUN! — memory & brain games for kids 6–10
+   Matching: musical, pictures, words
+   Brain: Copy Me (Simon), Number Recall (digit span),
+          Grid Memory (Corsi), Story Time, Who Is It?,
+          What's Missing?, Odd One Out
    ===================================================== */
 
 // ---------- Audio ----------
@@ -396,13 +448,13 @@ function sMatch() { [N.C5,N.E5,N.G5].forEach((f,k)=>tone(f,0.15,k*0.09,'sine',0.
 function sWrong() { tone(160, 0.25, 0, 'sawtooth', 0.08); }
 function sWin()   { [N.C4,N.E4,N.G4,N.C5,N.E5,N.G5].forEach((f,k)=>tone(f,0.22,k*0.12,'triangle',0.25)); }
 
-// ---------- Speech (reads things aloud for early readers) ----------
+// ---------- Speech ----------
 function say(text) {
   try {
     if (!('speechSynthesis' in window)) return;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-US'; u.rate = 0.85; u.pitch = 1.1;
+    u.lang = 'en-US'; u.rate = 0.9;
     speechSynthesis.speak(u);
   } catch (e) {}
 }
@@ -424,12 +476,44 @@ function shuffle(a) {
   }
   return a;
 }
-function chipSelect(el) {
-  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
+
+// ---------- Unified difficulty ----------
+const DIFF = {
+  match:   { labels:['6 cards','12 cards','20 cards'] },
+  seq:     { labels:['Start with 1 step','Start with 3 steps','Start with 5 · faster'] },
+  digits:  { labels:['Start with 2 numbers','Start with 3 numbers','Backwards! 🔄'] },
+  grid:    { labels:['3×3 · start with 2','3×3 · start with 3','4×4 · start with 3'] },
+  story:   { labels:['3 questions','5 questions','7 questions'] },
+  faces:   { labels:['3 kids · names only','5 kids · names + facts','7 kids · names + facts'] },
+  missing: { labels:['4 things','6 things','8 things · quick look'] },
+  odd:     { labels:['4 pictures','4 pictures · tricky','5 pictures · extra tricky'] }
+};
+const DIFF_TITLES = {
+  match_musical:'🎵 Musical', match_pictures:'🐶 Pictures', match_words:'📖 Words',
+  seq:'🎹 Copy Me', digits:'🔢 Number Recall', grid:'🟨 Grid Memory', story:'📚 Story Time',
+  faces:'🤝 Who Is It?', missing:"👀 What's Missing?", odd:'🕵️ Odd One Out'
+};
+let pending = 'match', level = 0;
+function openDiff(game, title) {
+  pending = game;
+  const cfg = DIFF[game === 'match' ? 'match' : game];
+  document.getElementById('diff-title').textContent = title;
+  cfg.labels.forEach((l, i) => document.getElementById('dl' + i).textContent = l);
+  show('diff');
+}
+function launch(lvl) {
+  level = lvl; audio();
+  if (pending === 'match') { pairs = [3,6,10][lvl]; startGame(); }
+  else if (pending === 'seq') seqOpen();
+  else if (pending === 'digits') digOpen();
+  else if (pending === 'grid') gridOpen();
+  else if (pending === 'story') storyOpen();
+  else if (pending === 'faces') facesOpen();
+  else if (pending === 'missing') missOpen();
+  else if (pending === 'odd') oddOpen();
 }
 
-// ---------- Win overlay (shared by every game) ----------
+// ---------- Win overlay ----------
 let againFn = () => {};
 function showWin(stars, bodyHtml, again, title) {
   againFn = again || (() => {});
@@ -453,59 +537,32 @@ function confetti() {
     setTimeout(() => d.remove(), 6000);
   }
 }
+function bestOf(key, val) {
+  const prev = parseInt(localStorage.getItem(key) || 0);
+  if (val > prev) { localStorage.setItem(key, val); return { best: val, isNew: true }; }
+  return { best: prev, isNew: false };
+}
 
 /* =====================================================
-   PART 1 — MATCHING CARD GAMES
+   MATCHING GAMES (musical, pictures, words)
    ===================================================== */
 const MELODIES = [
   [N.C4,N.E4,N.G4],[N.C5,N.A4,N.F4],[N.G4,N.G4,N.C5],[N.C4,N.C4,N.C4],[N.E5,N.E5,N.E5],
   [N.C4,N.G4,N.C4],[N.D4,N.F4,N.A4],[N.B4,N.A4,N.G4],[N.C4,N.E5,N.C4],[N.G4,N.E4,N.G4]
 ];
 const PICTURES = ['🐶','🐱','🦁','🐸','🦋','🐢','🐠','🦄','🐝','🐧'];
-const WORDS = ['cat','dog','sun','hat','bee','run','big','red','mom','dad'];
-const WORD_PICS = [['cat','🐱'],['dog','🐶'],['sun','☀️'],['bee','🐝'],['fish','🐟'],['star','⭐'],['frog','🐸'],['car','🚗'],['duck','🦆'],['apple','🍎']];
-const SHAPES = [
-  ['circle','#ef4444','<circle cx="50" cy="50" r="40" fill="COL"/>'],
-  ['square','#3b82f6','<rect x="12" y="12" width="76" height="76" rx="8" fill="COL"/>'],
-  ['triangle','#22c55e','<polygon points="50,10 92,88 8,88" fill="COL"/>'],
-  ['star','#f59e0b','<polygon points="50,6 61,38 95,38 67,58 77,92 50,71 23,92 33,58 5,38 39,38" fill="COL"/>'],
-  ['heart','#ec4899','<path d="M50 88 C20 62 8 44 8 30 C8 16 20 8 31 8 C40 8 47 14 50 20 C53 14 60 8 69 8 C80 8 92 16 92 30 C92 44 80 62 50 88Z" fill="COL"/>'],
-  ['diamond','#8b5cf6','<polygon points="50,6 90,50 50,94 10,50" fill="COL"/>'],
-  ['moon','#eab308','<path d="M70 10 A45 45 0 1 0 70 90 A36 36 0 1 1 70 10Z" fill="COL"/>'],
-  ['ring','#06b6d4','<circle cx="50" cy="50" r="38" fill="none" stroke="COL" stroke-width="18"/>'],
-  ['cross','#f97316','<path d="M35 10 h30 v25 h25 v30 h-25 v25 h-30 v-25 h-25 v-30 h25 Z" fill="COL"/>'],
-  ['oval','#14b8a6','<ellipse cx="50" cy="50" rx="44" ry="28" fill="COL"/>']
-];
-const MODE_INFO = {
-  musical:{name:'🎵 Musical'}, shapes:{name:'🔷 Shapes'}, pictures:{name:'🐶 Pictures'},
-  words:{name:'📖 Words'}, numbers:{name:'🔢 Numbers'}, wordpic:{name:'🧩 Word + Picture'}
-};
+const WORDS = ['tiger','ocean','magnet','rocket','castle','planet','shadow','thunder','crystal','compass'];
 let mode = 'pictures', pairs = 3;
 let deck = [], first = null, lock = false, moves = 0, found = 0;
 function bestKey() { return 'memoryBest_' + mode + '_' + pairs; }
-
 function buildDeck() {
   const cards = [];
   const add = (matchId, html, spoken) => cards.push({ matchId, html, spoken });
   if (mode === 'pictures') {
     shuffle(PICTURES.slice()).slice(0, pairs).forEach((e, i) => { add(i,'<span>'+e+'</span>'); add(i,'<span>'+e+'</span>'); });
-  } else if (mode === 'shapes') {
-    shuffle(SHAPES.slice()).slice(0, pairs).forEach((s, i) => {
-      const svg = '<svg viewBox="0 0 100 100">' + s[2].replace(/COL/g, s[1]) + '</svg>';
-      add(i, svg, s[0]); add(i, svg, s[0]);
-    });
   } else if (mode === 'words') {
     shuffle(WORDS.slice()).slice(0, pairs).forEach((w, i) => {
       const html = '<span class="word">' + w + '</span>'; add(i, html, w); add(i, html, w);
-    });
-  } else if (mode === 'wordpic') {
-    shuffle(WORD_PICS.slice()).slice(0, pairs).forEach((p, i) => {
-      add(i, '<span class="word">'+p[0]+'</span>', p[0]); add(i, '<span>'+p[1]+'</span>', p[0]);
-    });
-  } else if (mode === 'numbers') {
-    shuffle([1,2,3,4,5,6,7,8,9,10]).slice(0, pairs).forEach((n, i) => {
-      add(i, '<span class="num">'+n+'</span>', String(n));
-      add(i, '<span class="dots">'+'⭐'.repeat(n)+'</span>', String(n));
     });
   } else if (mode === 'musical') {
     shuffle([0,1,2,3,4,5,6,7,8,9]).slice(0, pairs).forEach((m) => {
@@ -515,7 +572,6 @@ function buildDeck() {
   return shuffle(cards);
 }
 function playMelody(i) { MELODIES[i].forEach((f, k) => tone(f, 0.28, k * 0.3, 'triangle', 0.3)); }
-
 function startGame() {
   hideWin();
   deck = buildDeck();
@@ -523,7 +579,7 @@ function startGame() {
   document.getElementById('moves').textContent = '0';
   document.getElementById('found').textContent = '0';
   document.getElementById('total').textContent = pairs;
-  document.getElementById('game-title').textContent = MODE_INFO[mode].name;
+  document.getElementById('game-title').textContent = DIFF_TITLES['match_' + mode];
   const best = localStorage.getItem(bestKey());
   document.getElementById('best-pill').style.display = best ? '' : 'none';
   document.getElementById('best').textContent = best || '–';
@@ -535,7 +591,6 @@ function startGame() {
   deck.forEach((c) => {
     const b = document.createElement('button');
     b.className = 'card';
-    b.setAttribute('aria-label', 'card');
     b.innerHTML = '<div class="card-inner"><div class="face back">❓</div><div class="face front">' + c.html + '</div></div>';
     b.addEventListener('click', () => flip(b, c));
     board.appendChild(b);
@@ -580,21 +635,21 @@ function matchWin() {
   let bestMsg;
   if (!prev || moves < parseInt(prev)) { localStorage.setItem(key, moves); bestMsg = '<p class="new-best">🏆 New best score!</p>'; }
   else bestMsg = '<p>Your best: ' + prev + ' moves</p>';
-  say(stars === 3 ? 'Amazing! Three stars!' : 'Great job! You found all the pairs!');
   showWin(stars, '<p>Finished in <b>' + moves + '</b> moves</p>' + bestMsg, startGame);
 }
 
 /* =====================================================
-   PART 2 — COPY ME (musical sequence, like Simon)
+   COPY ME (Simon) — plain colored tiles
    ===================================================== */
 const SEQ_TONES = [N.C4, N.E4, N.G4, N.C5];
+const SEQ_CFG = [[1, 700], [3, 600], [5, 480]]; // [startLen, speed] per level
 let sPat = [], sIn = [], sPlaying = false, sActive = false;
-
+function seqKey() { return 'seqBest_' + level; }
 function seqOpen() {
   stopAll(); sActive = false; sPat = [];
   document.getElementById('seq-level').textContent = '–';
-  document.getElementById('seq-best').textContent = localStorage.getItem('seqBest') || 0;
-  document.getElementById('seq-status').textContent = 'Watch the tiles, then copy the pattern!';
+  document.getElementById('seq-best').textContent = localStorage.getItem(seqKey()) || 0;
+  document.getElementById('seq-status').textContent = 'Watch the pattern, then repeat it!';
   document.getElementById('seq-start').classList.remove('hidden');
   seqDisable(true);
   show('seq');
@@ -606,9 +661,11 @@ function seqLight(i, dur) {
   tone(SEQ_TONES[i], 0.4, 0, 'triangle', 0.3);
   setTimeout(() => t.classList.remove('lit'), dur || 350);
 }
-function seqStart() {
+function seqRun() {
   audio(); stopAll();
   sPat = []; sActive = true;
+  const startLen = SEQ_CFG[level][0];
+  for (let i = 0; i < startLen - 1; i++) sPat.push(Math.floor(Math.random() * 4));
   document.getElementById('seq-start').classList.add('hidden');
   seqNext();
 }
@@ -619,7 +676,7 @@ function seqNext() {
   document.getElementById('seq-status').textContent = '👀 Watch…';
   seqDisable(true);
   sPlaying = true;
-  const speed = sPat.length > 6 ? 550 : 700;
+  const speed = SEQ_CFG[level][1];
   sPat.forEach((t, k) => later(() => seqLight(t, speed * 0.55), 800 + k * speed));
   later(() => {
     sPlaying = false;
@@ -632,79 +689,267 @@ function seqTap(i) {
   seqLight(i, 250);
   sIn.push(i);
   const pos = sIn.length - 1;
-  if (sPat[pos] !== i) { // wrong!
+  if (sPat[pos] !== i) {
     sActive = false;
     seqDisable(true);
     sWrong();
-    const level = sPat.length - 1;
-    const prev = parseInt(localStorage.getItem('seqBest') || 0);
-    let bestMsg = '';
-    if (level > prev) { localStorage.setItem('seqBest', level); bestMsg = '<p class="new-best">🏆 New best!</p>'; }
-    document.getElementById('seq-best').textContent = Math.max(level, prev);
-    const stars = level >= 8 ? 3 : level >= 5 ? 2 : 1;
-    say(level >= 5 ? 'Wow, great listening!' : 'Good try! Play again!');
-    later(() => showWin(stars, '<p>You copied <b>' + level + '</b> pattern' + (level === 1 ? '' : 's') + '!</p>' + bestMsg,
-      () => { show('seq'); seqStart(); }, level >= 5 ? '🎉 Super ears!' : '🎵 Good try!'), 700);
+    const score = sPat.length - 1;
+    const b = bestOf(seqKey(), score);
+    document.getElementById('seq-best').textContent = b.best;
+    const stars = score >= 8 ? 3 : score >= 5 ? 2 : 1;
+    later(() => showWin(stars,
+      '<p>You repeated a pattern of <b>' + score + '</b>!</p>' + (b.isNew ? '<p class="new-best">🏆 New best!</p>' : '<p>Your best: ' + b.best + '</p>'),
+      () => { show('seq'); seqRun(); }, score >= 5 ? '🎉 Super memory!' : '🎵 Good try!'), 700);
     document.getElementById('seq-start').classList.remove('hidden');
-    document.getElementById('seq-status').textContent = 'Press Start to play again';
+    document.getElementById('seq-status').textContent = 'Press Start to try again';
     return;
   }
-  if (sIn.length === sPat.length) { // round complete
+  if (sIn.length === sPat.length) {
     seqDisable(true);
-    document.getElementById('seq-status').textContent = '✅ Yes! One more…';
+    document.getElementById('seq-status').textContent = '✅ One more step…';
     sMatch();
     later(seqNext, 1100);
   }
 }
 
 /* =====================================================
-   PART 3 — STORY TIME (listen, remember, answer)
+   NUMBER RECALL (digit span — the classic working-memory task)
+   ===================================================== */
+const DIG_CFG = [[2, false], [3, false], [2, true]]; // [startLen, backwards]
+let dSeq = [], dIn = [], dLen = 2, dBack = false, dActive = false;
+function digKey() { return 'digBest_' + level; }
+function digOpen() {
+  stopAll(); dActive = false;
+  dBack = DIG_CFG[level][1];
+  document.getElementById('dig-level').textContent = '–';
+  document.getElementById('dig-best').textContent = localStorage.getItem(digKey()) || 0;
+  document.getElementById('dig-status').textContent = dBack
+    ? 'Type the numbers BACKWARDS! 🔄' : 'Remember the numbers!';
+  document.getElementById('dig-show').textContent = '';
+  document.getElementById('dig-entered').textContent = '';
+  document.getElementById('keypad').classList.add('hidden');
+  document.getElementById('dig-start').classList.remove('hidden');
+  const kp = document.getElementById('keypad');
+  if (!kp.childElementCount) {
+    for (let n = 0; n <= 9; n++) {
+      const b = document.createElement('button');
+      b.className = 'key-btn'; b.textContent = n;
+      b.onclick = () => digTap(n);
+      kp.appendChild(b);
+    }
+  }
+  show('digits');
+}
+function digRun() {
+  audio(); stopAll();
+  dLen = DIG_CFG[level][0]; dActive = true;
+  document.getElementById('dig-start').classList.add('hidden');
+  digRound();
+}
+function digRound() {
+  dIn = [];
+  dSeq = [];
+  for (let i = 0; i < dLen; i++) {
+    let n = Math.floor(Math.random() * 10);
+    while (i > 0 && n === dSeq[i-1]) n = Math.floor(Math.random() * 10); // no doubles
+    dSeq.push(n);
+  }
+  document.getElementById('dig-level').textContent = dLen;
+  document.getElementById('dig-entered').textContent = '';
+  document.getElementById('keypad').classList.add('hidden');
+  document.getElementById('dig-status').textContent = '👀 Watch…';
+  const showEl = document.getElementById('dig-show');
+  dSeq.forEach((n, k) => {
+    later(() => { showEl.textContent = n; sFlip(); }, 600 + k * 900);
+    later(() => { showEl.textContent = ''; }, 600 + k * 900 + 650);
+  });
+  later(() => {
+    document.getElementById('dig-status').textContent = dBack ? '🔄 Type them BACKWARDS!' : '⌨️ Type them in order!';
+    document.getElementById('keypad').classList.remove('hidden');
+  }, 600 + dSeq.length * 900);
+}
+function digTap(n) {
+  if (!dActive) return;
+  dIn.push(n);
+  document.getElementById('dig-entered').textContent = dIn.join(' ');
+  sFlip();
+  if (dIn.length < dSeq.length) return;
+  const target = dBack ? dSeq.slice().reverse() : dSeq;
+  const ok = dIn.every((v, i) => v === target[i]);
+  document.getElementById('keypad').classList.add('hidden');
+  if (ok) {
+    sMatch();
+    document.getElementById('dig-status').textContent = '✅ Correct! One more digit…';
+    dLen++;
+    if (dLen > 9) { digEnd(9); return; }
+    later(digRound, 1000);
+  } else {
+    sWrong();
+    document.getElementById('dig-show').textContent = target.join(' ');
+    document.getElementById('dig-status').textContent = '❌ It was: ' + target.join(' ');
+    later(() => digEnd(dLen - 1), 1400);
+  }
+}
+function digEnd(score) {
+  dActive = false;
+  const b = bestOf(digKey(), score);
+  document.getElementById('dig-best').textContent = b.best;
+  const t3 = dBack ? 4 : 6, t2 = dBack ? 3 : 4;
+  const stars = score >= t3 ? 3 : score >= t2 ? 2 : 1;
+  showWin(stars,
+    '<p>You remembered <b>' + score + '</b> numbers' + (dBack ? ' backwards' : '') + '!</p>' +
+    (b.isNew ? '<p class="new-best">🏆 New best!</p>' : '<p>Your best: ' + b.best + '</p>'),
+    () => { show('digits'); digRun(); },
+    score >= t3 ? '🎉 Number genius!' : '🔢 Nice try!');
+  document.getElementById('dig-start').classList.remove('hidden');
+}
+
+/* =====================================================
+   GRID MEMORY (Corsi block-tapping — spatial working memory)
+   ===================================================== */
+const GRID_CFG = [[3, 2], [3, 3], [4, 3]]; // [gridSize, startLen]
+let gSize = 3, gSeq = [], gIn = [], gLen = 2, gActive = false, gPlaying = false;
+function gridKey() { return 'gridBest_' + level; }
+function gridOpen() {
+  stopAll(); gActive = false;
+  gSize = GRID_CFG[level][0];
+  document.getElementById('grid-level').textContent = '–';
+  document.getElementById('grid-best').textContent = localStorage.getItem(gridKey()) || 0;
+  document.getElementById('grid-status').textContent = 'Watch the flashes, then tap them in order!';
+  const g = document.getElementById('mem-grid');
+  g.style.gridTemplateColumns = 'repeat(' + gSize + ',1fr)';
+  g.innerHTML = '';
+  for (let i = 0; i < gSize * gSize; i++) {
+    const b = document.createElement('button');
+    b.className = 'mem-cell'; b.disabled = true;
+    b.onclick = () => gridTap(i, b);
+    g.appendChild(b);
+  }
+  document.getElementById('grid-start').classList.remove('hidden');
+  show('grid');
+}
+function gridCells() { return Array.from(document.getElementById('mem-grid').children); }
+function gridDisable(d) { gridCells().forEach(c => c.disabled = d); }
+function gridFlash(i, dur, cls) {
+  const c = gridCells()[i];
+  c.classList.add(cls || 'lit');
+  if (!cls) tone(N.C5, 0.25, 0, 'sine', 0.2);
+  setTimeout(() => c.classList.remove(cls || 'lit'), dur || 450);
+}
+function gridRun() {
+  audio(); stopAll();
+  gLen = GRID_CFG[level][1]; gActive = true;
+  document.getElementById('grid-start').classList.add('hidden');
+  gridRound();
+}
+function gridRound() {
+  gIn = [];
+  const cellCount = gSize * gSize;
+  gSeq = shuffle(Array.from({length: cellCount}, (_, i) => i)).slice(0, Math.min(gLen, cellCount));
+  document.getElementById('grid-level').textContent = gSeq.length;
+  document.getElementById('grid-status').textContent = '👀 Watch…';
+  gridDisable(true);
+  gPlaying = true;
+  gSeq.forEach((c, k) => later(() => gridFlash(c, 480), 700 + k * 750));
+  later(() => {
+    gPlaying = false;
+    document.getElementById('grid-status').textContent = '👆 Your turn — same order!';
+    gridDisable(false);
+  }, 700 + gSeq.length * 750);
+}
+function gridTap(i, el) {
+  if (gPlaying || !gActive) return;
+  const pos = gIn.length;
+  gIn.push(i);
+  if (gSeq[pos] !== i) {
+    gActive = false;
+    gridDisable(true);
+    gridFlash(i, 700, 'bad');
+    gridFlash(gSeq[pos], 700, 'good');
+    sWrong();
+    const score = gLen - 1;
+    const b = bestOf(gridKey(), score);
+    document.getElementById('grid-best').textContent = b.best;
+    const stars = score >= 6 ? 3 : score >= 4 ? 2 : 1;
+    later(() => showWin(stars,
+      '<p>You remembered <b>' + score + '</b> spots!</p>' +
+      (b.isNew ? '<p class="new-best">🏆 New best!</p>' : '<p>Your best: ' + b.best + '</p>'),
+      () => { show('grid'); gridRun(); },
+      score >= 5 ? '🎉 Eagle eyes!' : '🟨 Good try!'), 900);
+    document.getElementById('grid-start').classList.remove('hidden');
+    document.getElementById('grid-status').textContent = 'Press Start to try again';
+    return;
+  }
+  gridFlash(i, 300, 'good');
+  sFlip();
+  if (gIn.length === gSeq.length) {
+    gridDisable(true);
+    const cellCount = gSize * gSize;
+    if (gLen >= cellCount) {
+      // filled the whole grid — champion!
+      const b = bestOf(gridKey(), gLen);
+      document.getElementById('grid-best').textContent = b.best;
+      later(() => showWin(3, '<p>You remembered the WHOLE grid — <b>' + gLen + '</b> spots!</p>', () => { show('grid'); gridRun(); }, '🏆 Grid champion!'), 600);
+      return;
+    }
+    document.getElementById('grid-status').textContent = '✅ One more spot…';
+    sMatch();
+    gLen++;
+    later(gridRound, 1100);
+  }
+}
+
+/* =====================================================
+   STORY TIME — longer stories, real details to remember
    ===================================================== */
 const STORIES = [
-  { t:'Tom and the Kite',
-    s:'Tom has a red kite. He flies the kite in the park. His dog Rex runs and barks. The kite goes up, up, up to the clouds!',
+  { t:'The Treasure Map',
+    s:'On Saturday morning, Leo found an old map folded inside his grandfather’s toolbox. The map showed a path starting at the big oak tree, twenty steps north to the bird bath, then left at the rose bush. Leo brought his sister Emma and their dog Biscuit to help him search. Behind the garden shed, they dug with a red shovel and hit something hard — a small metal box. Inside were six old coins, a photo of Grandpa as a boy, and a note that said “Adventure is everywhere.” Emma kept the photo on her desk, and Leo dropped the coins into his blue piggy bank.',
     qs:[
-      { q:'What color is the kite?', o:['🟥 red','🟦 blue','🟩 green'], c:0 },
-      { q:'Who is Rex?', o:['🐶 a dog','🐱 a cat','🐦 a bird'], c:0 },
-      { q:'Where does Tom fly the kite?', o:['🏖️ the beach','🌳 the park','🏠 home'], c:1 },
-      { q:'Where does the kite go?', o:['🌲 in a tree','💧 in the water','☁️ to the clouds'], c:2 }
+      { q:'Where did Leo find the map?', o:['In the toolbox','Under his bed','In a library book'], c:0 },
+      { q:'How many steps north did the map say?', o:['Ten','Twenty','Thirty'], c:1 },
+      { q:'What was the dog’s name?', o:['Buttons','Biscuit','Bandit'], c:1 },
+      { q:'What color was the shovel?', o:['Red','Green','Yellow'], c:0 },
+      { q:'How many coins were in the box?', o:['Four','Six','Eight'], c:1 },
+      { q:'What did the note say?', o:['“Dig deeper”','“Adventure is everywhere”','“Finders keepers”'], c:1 },
+      { q:'Where did Leo put the coins?', o:['His blue piggy bank','His pocket','A glass jar'], c:0 }
     ]},
-  { t:"Mia's Cake",
-    s:"Mia bakes a cake with her mom. The cake is for Dad's birthday. Mia puts five candles on top. The cat licks the spoon!",
+  { t:'The Science Fair',
+    s:'Zara worked for two weeks on her science fair project about volcanoes. She built the volcano out of clay and painted it brown and orange. On Friday, she mixed baking soda and vinegar, and the volcano erupted with red foam in front of the whole school! Her best friend Noah presented a robot that could sort marbles by color. The judges gave Zara second place and Noah third place. First place went to a girl named Priya, who grew sparkling crystals out of salt water. Zara wasn’t sad at all — she high-fived Noah and whispered, “Next year, we team up.”',
     qs:[
-      { q:'Who helps Mia bake?', o:['👩 her mom','👴 grandpa','👨 her dad'], c:0 },
-      { q:'Whose birthday is it?', o:['🎂 Mia','🎂 Dad','🎂 the cat'], c:1 },
-      { q:'How many candles?', o:['3️⃣ three','5️⃣ five','7️⃣ seven'], c:1 },
-      { q:'Who licks the spoon?', o:['🐱 the cat','🐶 the dog','👧 Mia'], c:0 }
+      { q:'How long did Zara work on her project?', o:['Two days','Two weeks','Two months'], c:1 },
+      { q:'What was Zara’s project about?', o:['A volcano','A tornado','A rocket'], c:0 },
+      { q:'Which two things made the volcano erupt?', o:['Salt and water','Baking soda and vinegar','Sugar and lemon juice'], c:1 },
+      { q:'What did Noah’s robot sort?', o:['Coins','Marbles','Buttons'], c:1 },
+      { q:'What place did Zara win?', o:['First','Second','Third'], c:1 },
+      { q:'Who won first place?', o:['Priya','Noah','Zara'], c:0 },
+      { q:'What did Priya grow?', o:['Tomato plants','Crystals','Mushrooms'], c:1 }
     ]},
-  { t:'The Little Frog',
-    s:'A little frog sits on a rock. He is green with big eyes. He jumps into the pond. Splash! He swims to his three frog friends.',
+  { t:'The Bakery Delivery',
+    s:'Every morning before school, Sam walked past Rosa’s bakery on Maple Street. On Tuesday, Rosa asked Sam to deliver a box of twelve muffins to the fire station, because the firefighters were celebrating Captain Diaz’s ten years of service. On the way, Sam met Mr. Chen, the mail carrier, who was searching everywhere for a lost package. Sam spotted the package under a green bench near the fountain, and Mr. Chen was so relieved he did a little dance. At the fire station, the firefighters let Sam try on a real helmet. As a thank-you, Rosa gave Sam a warm chocolate croissant and let him ring the bakery’s silver bell.',
     qs:[
-      { q:'What color is the frog?', o:['🟩 green','🟦 blue','🟥 red'], c:0 },
-      { q:'Where does the frog sit?', o:['🌸 a flower','🪨 a rock','🍃 a leaf'], c:1 },
-      { q:'Where does he jump?', o:['💦 the pond','🛏️ his bed','🌳 a tree'], c:0 },
-      { q:'How many frog friends?', o:['2️⃣ two','3️⃣ three','4️⃣ four'], c:1 }
+      { q:'What street is the bakery on?', o:['Oak Street','Maple Street','River Street'], c:1 },
+      { q:'How many muffins were in the box?', o:['Ten','Twelve','Twenty'], c:1 },
+      { q:'Who was celebrating ten years of service?', o:['Captain Diaz','Mr. Chen','Rosa'], c:0 },
+      { q:'What was Mr. Chen looking for?', o:['His keys','A lost package','His hat'], c:1 },
+      { q:'Where was the package?', o:['Under a green bench','Behind the fountain','On the bus stop'], c:0 },
+      { q:'What did the firefighters let Sam try on?', o:['A jacket','Boots','A helmet'], c:2 },
+      { q:'What treat did Rosa give Sam?', o:['A blueberry muffin','A chocolate croissant','A cinnamon roll'], c:1 }
     ]},
-  { t:'Ben at the Zoo',
-    s:"Ben goes to the zoo with Grandpa. He sees a big gray elephant. A cheeky monkey steals Ben's banana! Ben laughs and laughs.",
+  { t:'Camp Blue Lake',
+    s:'In July, Maya went to summer camp at Blue Lake for five days. Her cabin was called Otter, and her bunkmate was a girl named Josie from Canada. On the second day, they went canoeing and spotted a turtle sunbathing on a log — Josie named it Professor Shell. At the campfire, Maya told a spooky story about a singing ghost, but everyone laughed instead of screaming. On the last night, the campers made s’mores, and Maya’s marshmallow caught fire twice. Before the buses left, Josie promised to send letters, and the two girls traded friendship bracelets — Maya’s was purple, Josie’s was green.',
     qs:[
-      { q:'Who goes with Ben?', o:['👴 Grandpa','👩 Mom','👦 his friend'], c:0 },
-      { q:'Which animal is gray?', o:['🐵 the monkey','🐘 the elephant','🦁 the lion'], c:1 },
-      { q:'What does the monkey steal?', o:['🍌 a banana','🍎 an apple','🧢 a hat'], c:0 },
-      { q:'What does Ben do?', o:['😭 cries','😴 sleeps','😂 laughs'], c:2 }
-    ]},
-  { t:'The Snowy Day',
-    s:'It snows all night. Lily makes a snowman with a carrot nose. She gives him her blue hat. In the sun, the snowman melts.',
-    qs:[
-      { q:"What is the snowman's nose?", o:['🥕 a carrot','🪨 a stone','🌿 a stick'], c:0 },
-      { q:'What color is the hat?', o:['🟥 red','🟦 blue','🟨 yellow'], c:1 },
-      { q:'What does Lily make?', o:['⛄ a snowman','🏰 a castle','🎂 a cake'], c:0 },
-      { q:'What happens in the sun?', o:['🕺 he dances','💧 he melts','😴 he sleeps'], c:1 }
+      { q:'How many days was Maya at camp?', o:['Three','Five','Seven'], c:1 },
+      { q:'What was Maya’s cabin called?', o:['Otter','Beaver','Eagle'], c:0 },
+      { q:'Where was Josie from?', o:['Canada','Mexico','France'], c:0 },
+      { q:'What did they name the turtle?', o:['Mr. Slowpoke','Professor Shell','Captain Green'], c:1 },
+      { q:'What was Maya’s spooky story about?', o:['A dancing skeleton','A singing ghost','A talking owl'], c:1 },
+      { q:'How many times did the marshmallow catch fire?', o:['Once','Twice','Three times'], c:1 },
+      { q:'What color was Maya’s bracelet?', o:['Green','Purple','Blue'], c:1 }
     ]}
 ];
-let stQCount = 2, stStory = null, stQs = [], stIdx = 0, stScore = 0;
-
-function storyDiff(n, el) { stQCount = n; chipSelect(el); storyOpen(); }
+const STORY_QCOUNT = [3, 5, 7];
+let stStory = null, stQs = [], stIdx = 0, stScore = 0;
 function storyOpen() {
   stopAll(); hideWin();
   stStory = STORIES[Math.floor(Math.random() * STORIES.length)];
@@ -713,12 +958,11 @@ function storyOpen() {
   document.getElementById('story-read').classList.remove('hidden');
   document.getElementById('story-q').classList.add('hidden');
   show('story');
-  later(() => readStory(), 500);
 }
 function readStory() { say(stStory.t + '. ' + stStory.s); }
 function storyQuiz() {
   stopSay();
-  stQs = shuffle(stStory.qs.slice()).slice(0, stQCount);
+  stQs = shuffle(stStory.qs.slice()).slice(0, STORY_QCOUNT[level]);
   stIdx = 0; stScore = 0;
   document.getElementById('story-read').classList.add('hidden');
   document.getElementById('story-q').classList.remove('hidden');
@@ -737,7 +981,6 @@ function storyShowQ() {
     b.onclick = () => storyAnswer(b, opt.ok, order);
     box.appendChild(b);
   });
-  say(q.q);
 }
 function storyAnswer(btn, ok, order) {
   document.querySelectorAll('#story-opts .opt-btn').forEach((b, i) => {
@@ -749,109 +992,118 @@ function storyAnswer(btn, ok, order) {
     stIdx++;
     if (stIdx < stQs.length) storyShowQ();
     else {
-      const stars = stScore === stQs.length ? 3 : stScore >= Math.ceil(stQs.length / 2) ? 2 : 1;
-      say(stars === 3 ? 'Perfect! You remembered everything!' : 'Good listening! Try another story!');
-      showWin(stars, '<p>You got <b>' + stScore + ' of ' + stQs.length + '</b> right!</p>', storyOpen, '📚 Story finished!');
+      const stars = stScore === stQs.length ? 3 : stScore >= Math.ceil(stQs.length * 0.6) ? 2 : 1;
+      showWin(stars, '<p>You remembered <b>' + stScore + ' of ' + stQs.length + '</b> details!</p>', storyOpen, '📚 Story finished!');
     }
-  }, 1200);
+  }, 1100);
 }
 
 /* =====================================================
-   PART 4 — WHO IS IT? (friends & names)
+   WHO IS IT? — names AND facts about each person
    ===================================================== */
-const FRIENDS = [
-  ['Max','🐵','#fde68a'], ['Rosie','🐰','#fbcfe8'], ['Bruno','🐻','#fcd34d'],
-  ['Pip','🐸','#bbf7d0'], ['Oli','🦉','#ddd6fe'], ['Momo','🐱','#fed7aa'], ['Buddy','🐶','#bfdbfe']
+const PEOPLE = [
+  { n:'Maya',  f:'👧🏽', bg:'#fde68a', facts:['plays chess in a club','has a parrot named Kiwi'] },
+  { n:'Leo',   f:'👦🏼', bg:'#bfdbfe', facts:['collects shiny rocks','is afraid of spiders'] },
+  { n:'Zara',  f:'👧🏾', bg:'#fbcfe8', facts:['builds small robots','speaks three languages'] },
+  { n:'Noah',  f:'👦🏽', bg:'#bbf7d0', facts:['plays the drums','has a twin sister'] },
+  { n:'Priya', f:'👧🏻', bg:'#ddd6fe', facts:['grows salt crystals','won a spelling bee'] },
+  { n:'Sam',   f:'👦🏿', bg:'#fed7aa', facts:['bakes chocolate cookies','is the fastest runner in class'] },
+  { n:'Josie', f:'👧🏼', bg:'#a7f3d0', facts:['moved here from Canada','draws her own comic books'] }
 ];
-const FACTS = ['loves jam','can hop high','naps a lot','sings songs','reads books','chases yarn','digs holes'];
-let fCount = 3, fSet = [], fIdx = 0, fScore = 0;
-
-function facesDiff(n, el) { fCount = n; chipSelect(el); facesOpen(); }
+const FACE_COUNT = [3, 5, 7];
+const FACT_QS = [0, 2, 4]; // extra fact questions per level
+let fSet = [], fRounds = [], fIdx = 0, fScore = 0;
 function facesOpen() {
   stopAll(); hideWin();
-  fSet = shuffle(FRIENDS.slice()).slice(0, fCount).map((f, i) => ({ name:f[0], face:f[1], bg:f[2], fact:FACTS[i] }));
+  fSet = shuffle(PEOPLE.slice()).slice(0, FACE_COUNT[level]);
   const grid = document.getElementById('friends-grid');
   grid.innerHTML = '';
-  fSet.forEach((f) => {
+  fSet.forEach((p) => {
     const d = document.createElement('div');
     d.className = 'friend-card';
-    d.innerHTML = '<div class="friend-face" style="background:' + f.bg + '">' + f.face + '</div>' +
-      '<div class="friend-name">' + f.name + '</div><div class="friend-fact">' + f.fact + '</div>';
-    d.onclick = () => say('This is ' + f.name + '. ' + f.name + ' ' + f.fact + '.');
+    d.innerHTML = '<div class="friend-face" style="background:' + p.bg + '">' + p.f + '</div>' +
+      '<div class="friend-name">' + p.n + '</div>' +
+      '<div class="friend-fact">' + p.facts[0] + '<br>' + p.facts[1] + '</div>';
+    d.onclick = () => say(p.n + ' ' + p.facts[0] + ', and ' + p.facts[1] + '.');
     grid.appendChild(d);
   });
   document.getElementById('faces-study').classList.remove('hidden');
   document.getElementById('faces-q').classList.add('hidden');
   show('faces');
-  later(() => say('Meet your new friends! Tap each friend to hear their name.'), 400);
 }
 function facesQuiz() {
   stopSay();
-  fSet = shuffle(fSet);
+  // name rounds for everyone + fact rounds on medium/hard
+  fRounds = fSet.map(p => ({ type:'name', p }));
+  const factPeople = shuffle(fSet.slice()).slice(0, FACT_QS[level]);
+  factPeople.forEach(p => fRounds.push({ type:'fact', p, fact: p.facts[Math.floor(Math.random()*2)] }));
+  fRounds = shuffle(fRounds);
   fIdx = 0; fScore = 0;
   document.getElementById('faces-study').classList.add('hidden');
   document.getElementById('faces-q').classList.remove('hidden');
   facesShowQ();
 }
 function facesShowQ() {
-  const p = fSet[fIdx];
+  const r = fRounds[fIdx];
   const qf = document.getElementById('quiz-face');
-  qf.textContent = p.face; qf.style.background = p.bg;
-  document.getElementById('faces-prog').textContent = 'Friend ' + (fIdx + 1) + ' of ' + fSet.length;
-  let names = fSet.map(f => f.name);
-  if (names.length > 4) names = shuffle(names.filter(n => n !== p.name)).slice(0, 3).concat(p.name);
+  document.getElementById('faces-prog').textContent = 'Question ' + (fIdx + 1) + ' of ' + fRounds.length;
+  if (r.type === 'name') {
+    document.getElementById('faces-question').textContent = 'What is this kid’s name?';
+    qf.classList.remove('hidden');
+    qf.textContent = r.p.f; qf.style.background = r.p.bg;
+  } else {
+    document.getElementById('faces-question').textContent = 'Who ' + r.fact + '?';
+    qf.classList.add('hidden');
+  }
+  let names = fSet.map(p => p.n);
+  if (names.length > 4) names = shuffle(names.filter(n => n !== r.p.n)).slice(0, 3).concat(r.p.n);
   names = shuffle(names.slice());
   const box = document.getElementById('faces-opts');
   box.innerHTML = '';
   names.forEach((n) => {
     const b = document.createElement('button');
     b.className = 'opt-btn'; b.textContent = n;
-    b.onclick = () => facesAnswer(b, n === p.name, p.name);
+    b.onclick = () => facesAnswer(b, n === r.p.n, r.p.n);
     box.appendChild(b);
   });
-  say('Who is this?');
 }
 function facesAnswer(btn, ok, correctName) {
   document.querySelectorAll('#faces-opts .opt-btn').forEach((b) => {
     b.disabled = true;
     if (b.textContent === correctName) b.classList.add('right');
   });
-  if (ok) { fScore++; sMatch(); say('Yes! It\'s ' + correctName + '!'); }
-  else { btn.classList.add('wrong'); sWrong(); say('It\'s ' + correctName + '.'); }
+  if (ok) { fScore++; sMatch(); } else { btn.classList.add('wrong'); sWrong(); }
   later(() => {
     fIdx++;
-    if (fIdx < fSet.length) facesShowQ();
+    if (fIdx < fRounds.length) facesShowQ();
     else {
-      const stars = fScore === fSet.length ? 3 : fScore >= Math.ceil(fSet.length * 2 / 3) ? 2 : 1;
-      showWin(stars, '<p>You knew <b>' + fScore + ' of ' + fSet.length + '</b> friends!</p>', facesOpen, '🤗 All done!');
+      const stars = fScore === fRounds.length ? 3 : fScore >= Math.ceil(fRounds.length * 0.7) ? 2 : 1;
+      showWin(stars, '<p>You got <b>' + fScore + ' of ' + fRounds.length + '</b> right!</p>', facesOpen, '🤝 All done!');
     }
-  }, 1400);
+  }, 1100);
 }
 
 /* =====================================================
-   PART 5 — WHAT'S MISSING? (look, then spot the gone one)
+   WHAT'S MISSING?
    ===================================================== */
 const THINGS = ['🍎','🍌','🚗','⚽','🧸','🌟','🐟','🎈','🍪','🦆','🪁','🖍️','🍓','🚀','🌈','🎁'];
-let mCount = 4, mRound = 0, mScore = 0, mShown = [], mMiss = '';
-
-function missDiff(n, el) { mCount = n; chipSelect(el); missOpen(); }
+const MISS_CFG = [[4, 5], [6, 7], [8, 6]]; // [items, look-seconds]
+let mRound = 0, mScore = 0, mShown = [], mMiss = '';
 function missOpen() { stopAll(); hideWin(); show('missing'); missStart(); }
 function missStart() {
   stopAll();
   mRound = 0; mScore = 0;
   document.getElementById('miss-score').textContent = '0';
-  document.getElementById('miss-start').classList.add('hidden');
   missRound();
 }
 function missRound() {
   mRound++;
   document.getElementById('miss-round').textContent = mRound;
-  mShown = shuffle(THINGS.slice()).slice(0, mCount);
+  mShown = shuffle(THINGS.slice()).slice(0, MISS_CFG[level][0]);
   document.getElementById('miss-look').classList.remove('hidden');
   document.getElementById('miss-ask').classList.add('hidden');
   document.getElementById('miss-items').innerHTML = mShown.map(e => '<span class="item">' + e + '</span>').join('');
-  say('Look carefully!');
-  let secs = mCount <= 4 ? 5 : mCount <= 6 ? 7 : 9;
+  let secs = MISS_CFG[level][1];
   const cd = document.getElementById('miss-count');
   cd.textContent = secs;
   const iv = setInterval(() => {
@@ -877,7 +1129,6 @@ function missAsk() {
     b.onclick = () => missAnswer(b, e === mMiss);
     box.appendChild(b);
   });
-  say("One thing is gone! What's missing?");
 }
 function missAnswer(btn, ok) {
   document.querySelectorAll('#miss-opts .opt-btn').forEach((b) => {
@@ -890,11 +1141,78 @@ function missAnswer(btn, ok) {
     if (mRound < 5) missRound();
     else {
       const stars = mScore >= 5 ? 3 : mScore >= 3 ? 2 : 1;
-      say(stars === 3 ? 'Wow! Eagle eyes!' : 'Good looking! Play again!');
-      document.getElementById('miss-start').classList.remove('hidden');
       showWin(stars, '<p>You spotted <b>' + mScore + ' of 5</b>!</p>', missStart, '👀 Sharp eyes!');
     }
   }, 1300);
+}
+
+/* =====================================================
+   ODD ONE OUT — logical reasoning (categories)
+   ===================================================== */
+const ODD_SETS = {
+  easy: [
+    { items:['🐶','🐱','🐰','🚗'], odd:'🚗', why:'A car is not an animal!' },
+    { items:['🍎','🍌','🍇','⚽'], odd:'⚽', why:'A ball is not a fruit!' },
+    { items:['👟','🧢','🧦','🍕'], odd:'🍕', why:'Pizza is not something you wear!' },
+    { items:['🚌','🚗','🚲','🐟'], odd:'🐟', why:'A fish is not a vehicle!' },
+    { items:['🌹','🌻','🌷','🪑'], odd:'🪑', why:'A chair is not a flower!' },
+    { items:['🥄','🍴','🥢','📚'], odd:'📚', why:'A book is not for eating with!' }
+  ],
+  medium: [
+    { items:['🍎','🍓','🍒','🍌'], odd:'🍌', why:'The banana is the only one that is not red!' },
+    { items:['🐦','🦋','🐝','🐘'], odd:'🐘', why:'An elephant cannot fly!' },
+    { items:['🥕','🥦','🌽','🍎'], odd:'🍎', why:'An apple is a fruit — the rest are vegetables!' },
+    { items:['⚽','🏀','🎾','♟️'], odd:'♟️', why:'Chess is not played with a ball!' },
+    { items:['🚗','🚌','🚚','⛵'], odd:'⛵', why:'A boat travels on water, not roads!' },
+    { items:['🧊','❄️','⛄','🔥'], odd:'🔥', why:'Fire is hot — the rest are cold!' }
+  ],
+  hard: [
+    { items:['🐔','🐷','🐮','🐑','🦁'], odd:'🦁', why:'A lion is wild — the rest are farm animals!' },
+    { items:['🦇','🐦','🦅','🦉','🐧'], odd:'🐧', why:'A penguin cannot fly — all the others can!' },
+    { items:['🥁','🎸','🎹','🎺','📻'], odd:'📻', why:'A radio plays music, but you don’t play IT like an instrument!' },
+    { items:['🌕','🌍','☀️','🪐','🚀'], odd:'🚀', why:'A rocket is made by people — the rest are in space naturally!' },
+    { items:['🍦','🧊','⛄','🌋','❄️'], odd:'🌋', why:'A volcano is burning hot — the rest are freezing cold!' },
+    { items:['✏️','🖍️','🖊️','🖌️','✂️'], odd:'✂️', why:'Scissors cut — all the others draw or write!' }
+  ]
+};
+let oddRounds = [], oddIdx = 0, oddScore = 0;
+function oddOpen() { stopAll(); hideWin(); show('odd'); oddStart(); }
+function oddStart() {
+  const pool = ODD_SETS[['easy','medium','hard'][level]];
+  oddRounds = shuffle(pool.slice()).slice(0, 5);
+  oddIdx = 0; oddScore = 0;
+  document.getElementById('odd-score').textContent = '0';
+  oddShow();
+}
+function oddShow() {
+  const r = oddRounds[oddIdx];
+  document.getElementById('odd-round').textContent = oddIdx + 1;
+  document.getElementById('odd-why').textContent = '';
+  const box = document.getElementById('odd-opts');
+  box.innerHTML = '';
+  shuffle(r.items.slice()).forEach((e) => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn'; b.textContent = e;
+    b.onclick = () => oddAnswer(b, e === r.odd, r);
+    box.appendChild(b);
+  });
+}
+function oddAnswer(btn, ok, r) {
+  document.querySelectorAll('#odd-opts .opt-btn').forEach((b) => {
+    b.disabled = true;
+    if (b.textContent === r.odd) b.classList.add('right');
+  });
+  if (ok) { oddScore++; sMatch(); } else { btn.classList.add('wrong'); sWrong(); }
+  document.getElementById('odd-score').textContent = oddScore;
+  document.getElementById('odd-why').textContent = r.why;
+  later(() => {
+    oddIdx++;
+    if (oddIdx < oddRounds.length) oddShow();
+    else {
+      const stars = oddScore >= 5 ? 3 : oddScore >= 3 ? 2 : 1;
+      showWin(stars, '<p>You solved <b>' + oddScore + ' of 5</b> puzzles!</p>', oddStart, '🕵️ Great thinking!');
+    }
+  }, 1800);
 }
 
 /* =====================================================
@@ -903,20 +1221,10 @@ function missAnswer(btn, ok) {
 document.querySelectorAll('.mode-btn[data-mode]').forEach(b =>
   b.addEventListener('click', () => {
     mode = b.dataset.mode;
-    document.getElementById('diff-title').textContent = MODE_INFO[mode].name;
-    show('diff');
+    openDiff('match', DIFF_TITLES['match_' + mode]);
   }));
-document.querySelectorAll('.diff-btn').forEach(b =>
-  b.addEventListener('click', () => { pairs = parseInt(b.dataset.pairs); startGame(); }));
 document.querySelectorAll('.mode-btn[data-game]').forEach(b =>
-  b.addEventListener('click', () => {
-    audio();
-    const g = b.dataset.game;
-    if (g === 'seq') seqOpen();
-    else if (g === 'story') storyOpen();
-    else if (g === 'faces') facesOpen();
-    else if (g === 'missing') missOpen();
-  }));
+  b.addEventListener('click', () => openDiff(b.dataset.game, DIFF_TITLES[b.dataset.game])));
 
 // ---------- PWA service worker ----------
 if ('serviceWorker' in navigator) {
