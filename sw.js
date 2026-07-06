@@ -1,5 +1,5 @@
-// Memory Fun! service worker — lets the game work offline
-const CACHE = 'memory-fun-v4';
+// Memory Fun! service worker — offline support that never shows a stale game
+const CACHE = 'memory-fun-v5';
 const FILES = [
   './',
   './index.html',
@@ -23,8 +23,16 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
+// Network-first for pages (always get the newest game when online),
+// falling back to the cache so it still works offline.
 self.addEventListener('fetch', (e) => {
   e.respondWith(
-    caches.match(e.request).then((hit) => hit || fetch(e.request))
+    fetch(e.request)
+      .then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
