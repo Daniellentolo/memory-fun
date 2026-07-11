@@ -181,6 +181,33 @@
   .mem-cell:active:not(:disabled) { transform:scale(.94); }
   .mem-cell:disabled { cursor:default; }
 
+  /* ============ MATH ============ */
+  .m-math { background:#10b981; } .m-write { background:#6366f1; }
+  .math-q { font-size:clamp(1.8rem,8vw,2.6rem); text-align:center; font-weight:bold; color:#374151; margin:8px 0; }
+  .math-emoji { text-align:center; font-size:1.7rem; line-height:1.6; min-height:1.2em; margin-bottom:6px; word-break:break-all; }
+  .opts.num-opts { display:grid; grid-template-columns:1fr 1fr; }
+  .opts.num-opts .opt-btn { font-size:1.6rem; padding:16px; }
+
+  /* ============ WRITING ============ */
+  .write-target { text-align:center; font-size:2rem; letter-spacing:5px; font-weight:bold; color:#9ca3af; margin:4px 0 8px; }
+  .write-target .cur { color:#7c3aed; border-bottom:4px solid #7c3aed; }
+  .write-target .done-ch { color:#22c55e; }
+  #trace { display:block; margin:8px auto; background:#fff; border:3px dashed #c4b5fd; border-radius:18px; touch-action:none; cursor:crosshair; }
+  .write-btns { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .write-btns button {
+    border:none; border-radius:14px; padding:12px 16px; font-family:inherit; font-size:1rem;
+    font-weight:bold; color:#fff; cursor:pointer; box-shadow:0 4px 0 rgba(0,0,0,.2);
+  }
+  .write-btns button:active { transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.2); }
+  .w-say { background:#f59e0b; } .w-clear { background:#64748b; } .w-skip { background:#ef4444; } .w-done { background:#22c55e; font-size:1.1rem; }
+  .write-status { text-align:center; color:#7c3aed; font-weight:bold; min-height:1.4em; margin-top:6px; font-size:1rem; }
+
+  /* speaker rows for Who Is It options */
+  .opt-row { display:flex; gap:8px; }
+  .opt-row .opt-btn { flex:1; }
+  .say-btn { border:none; background:#ede9fe; color:#7c3aed; border-radius:12px; font-size:1.25rem; padding:0 16px; cursor:pointer; }
+  .say-btn:active { background:#ddd6fe; }
+
   /* ============ WIN ============ */
   #win { position:fixed; inset:0; background:rgba(30,10,60,.75); display:none; align-items:center; justify-content:center; z-index:50; padding:20px; }
   #win.show { display:flex; }
@@ -232,6 +259,12 @@
     <button class="mode-btn m-missing" data-game="missing"><span class="big">👀</span>What's Missing?<small>Spot what disappeared</small></button>
     <button class="mode-btn m-odd" data-game="odd"><span class="big">🕵️</span>Odd One Out<small>Which one doesn't belong?</small></button>
   </div>
+
+  <div class="section-label">🏫 School Games</div>
+  <div class="mode-grid">
+    <button class="mode-btn m-math" data-school="math"><span class="big">➕</span>Math<small>Equations for your grade</small></button>
+    <button class="mode-btn m-write" data-school="write"><span class="big">✏️</span>Writing<small>Trace letters, words & sentences</small></button>
+  </div>
   <footer class="credit">Made with ❤️ for curious kids</footer>
 </section>
 
@@ -246,6 +279,21 @@
     <button class="diff-btn d-easy" onclick="launch(0)">😊 Easy<small id="dl0"></small></button>
     <button class="diff-btn d-medium" onclick="launch(1)">🤔 Medium<small id="dl1"></small></button>
     <button class="diff-btn d-hard" onclick="launch(2)">🤯 Hard<small id="dl2"></small></button>
+  </div>
+</section>
+
+<!-- ============ GRADE PICKER (Math & Writing) ============ -->
+<section id="grade" class="screen">
+  <div class="screen-head">
+    <button class="back-btn" onclick="show('menu')">⬅ Back</button>
+    <h2 id="grade-title">Pick your grade</h2>
+    <span style="width:70px"></span>
+  </div>
+  <div class="diff-wrap">
+    <button class="diff-btn" style="background:#ec4899" onclick="pickGrade(0)">🎈 Kindergarten</button>
+    <button class="diff-btn" style="background:#22c55e" onclick="pickGrade(1)">📗 1st Grade</button>
+    <button class="diff-btn" style="background:#3b82f6" onclick="pickGrade(2)">📘 2nd Grade</button>
+    <button class="diff-btn" style="background:#8b5cf6" onclick="pickGrade(3)">📙 3rd Grade</button>
   </div>
 </section>
 
@@ -402,6 +450,49 @@
   </div>
 </section>
 
+<!-- ============ MATH ============ -->
+<section id="math" class="screen">
+  <div class="screen-head">
+    <button class="back-btn" onclick="stopAll();show('diff')">⬅ Back</button>
+    <h2 id="math-title">➕ Math</h2>
+    <span style="width:70px"></span>
+  </div>
+  <div class="hud">
+    <span class="pill">Question: <span id="math-idx">1</span>/10</span>
+    <span class="pill">Score: <span id="math-score">0</span></span>
+    <span class="pill">Best: <span id="math-best">–</span></span>
+  </div>
+  <div class="panel">
+    <div class="math-q" id="math-q"></div>
+    <div class="math-emoji" id="math-emoji"></div>
+    <div class="opts num-opts" id="math-opts"></div>
+    <div class="center-row"><button class="big-btn alt" onclick="mathSay()">🔊 Read it to me</button></div>
+  </div>
+</section>
+
+<!-- ============ WRITING ============ -->
+<section id="write" class="screen">
+  <div class="screen-head">
+    <button class="back-btn" onclick="stopAll();show('diff')">⬅ Back</button>
+    <h2 id="write-title">✏️ Writing</h2>
+    <span style="width:70px"></span>
+  </div>
+  <div class="hud">
+    <span class="pill" id="write-prog">1 of 5</span>
+  </div>
+  <div class="panel">
+    <div class="write-target" id="write-target"></div>
+    <canvas id="trace" width="320" height="320"></canvas>
+    <div class="write-btns">
+      <button class="w-say" onclick="writeSay()">🔊</button>
+      <button class="w-clear" onclick="writeClear()">↺ Clear</button>
+      <button class="w-skip" onclick="writeSkip()">⏭ Skip</button>
+      <button class="w-done" onclick="writeCheck()">✓ Done!</button>
+    </div>
+    <div class="write-status" id="write-status"></div>
+  </div>
+</section>
+
 <!-- ============ WIN OVERLAY ============ -->
 <div id="win">
   <div class="win-box">
@@ -486,13 +577,27 @@ const DIFF = {
   story:   { labels:['3 questions','5 questions','7 questions'] },
   faces:   { labels:['3 kids · names only','5 kids · names + facts','7 kids · names + facts'] },
   missing: { labels:['4 things','6 things','8 things · quick look'] },
-  odd:     { labels:['Start easy · gets harder','Start tricky · gets harder','Expert puzzles only'] }
+  odd:     { labels:['Start easy · gets harder','Start tricky · gets harder','Expert puzzles only'] },
+  math:    { labels:['Warm-up ✨','Just right 💪','Challenge 🔥'] },
+  write:   { labels:['Warm-up ✨','Just right 💪','Challenge 🔥'] }
 };
 const DIFF_TITLES = {
   match_musical:'🎵 Musical', match_pictures:'🐶 Pictures', match_words:'📖 Words',
   seq:'🎹 Copy Me', digits:'🔢 Number Recall', grid:'🟨 Grid Memory', story:'📚 Story Time',
-  faces:'🤝 Who Is It?', missing:"👀 What's Missing?", odd:'🕵️ Odd One Out'
+  faces:'🤝 Who Is It?', missing:"👀 What's Missing?", odd:'🕵️ Odd One Out',
+  math:'➕ Math', write:'✏️ Writing'
 };
+const GRADES = ['Kindergarten','1st Grade','2nd Grade','3rd Grade'];
+let schoolGame = 'math', grade = 0;
+function openGrade(g) {
+  schoolGame = g;
+  document.getElementById('grade-title').textContent = DIFF_TITLES[g];
+  show('grade');
+}
+function pickGrade(i) {
+  grade = i;
+  openDiff(schoolGame, DIFF_TITLES[schoolGame] + ' · ' + GRADES[i]);
+}
 let pending = 'match', level = 0;
 function openDiff(game, title) {
   pending = game;
@@ -511,6 +616,8 @@ function launch(lvl) {
   else if (pending === 'faces') facesOpen();
   else if (pending === 'missing') missOpen();
   else if (pending === 'odd') oddOpen();
+  else if (pending === 'math') mathOpen();
+  else if (pending === 'write') writeOpen();
 }
 
 // ---------- Win overlay ----------
@@ -993,16 +1100,23 @@ const STORIES = [
       { q:'What was Ruby’s prize?', o:['A frying pan','A golden pancake','A wooden spoon'], c:2 }
     ]}
 ];
-// pick stories so every story is played once before any repeats
+// pick stories so every story is played once before any repeats —
+// a story only counts as "seen" once its questions are actually finished,
+// so an unfinished story comes back in a later session
+let stStoryIdx = -1;
 function pickStory() {
   let seen = [];
   try { seen = JSON.parse(localStorage.getItem('storySeen') || '[]'); } catch(e) {}
   let unseen = STORIES.map((_, i) => i).filter(i => !seen.includes(i));
-  if (!unseen.length) { seen = []; unseen = STORIES.map((_, i) => i); }
-  const i = unseen[Math.floor(Math.random() * unseen.length)];
-  seen.push(i);
+  if (!unseen.length) { seen = []; localStorage.setItem('storySeen', '[]'); unseen = STORIES.map((_, i) => i); }
+  stStoryIdx = unseen[Math.floor(Math.random() * unseen.length)];
+  return STORIES[stStoryIdx];
+}
+function markStorySeen() {
+  let seen = [];
+  try { seen = JSON.parse(localStorage.getItem('storySeen') || '[]'); } catch(e) {}
+  if (!seen.includes(stStoryIdx)) seen.push(stStoryIdx);
   localStorage.setItem('storySeen', JSON.stringify(seen));
-  return STORIES[i];
 }
 const STORY_QCOUNT = [3, 5, 7];
 let stStory = null, stQs = [], stIdx = 0, stScore = 0;
@@ -1048,6 +1162,7 @@ function storyAnswer(btn, ok, order) {
     stIdx++;
     if (stIdx < stQs.length) storyShowQ();
     else {
+      markStorySeen(); // only now does this story count as played
       const stars = stScore === stQs.length ? 3 : stScore >= Math.ceil(stQs.length * 0.6) ? 2 : 1;
       showWin(stars, '<p>You remembered <b>' + stScore + ' of ' + stQs.length + '</b> details!</p>', storyOpen, '📚 Story finished!');
     }
@@ -1086,6 +1201,7 @@ function facesOpen() {
   document.getElementById('faces-study').classList.remove('hidden');
   document.getElementById('faces-q').classList.add('hidden');
   show('faces');
+  later(() => say('Tap each kid to hear their name and what they like.'), 400);
 }
 function facesQuiz() {
   stopSay();
@@ -1102,33 +1218,45 @@ function facesQuiz() {
 function facesShowQ() {
   const r = fRounds[fIdx];
   const qf = document.getElementById('quiz-face');
+  let qText;
   document.getElementById('faces-prog').textContent = 'Question ' + (fIdx + 1) + ' of ' + fRounds.length;
   if (r.type === 'name') {
-    document.getElementById('faces-question').textContent = 'What is this kid’s name?';
+    qText = 'What is this kid’s name?';
     qf.classList.remove('hidden');
     qf.textContent = r.p.f; qf.style.background = r.p.bg;
   } else {
-    document.getElementById('faces-question').textContent = 'Who ' + r.fact + '?';
+    qText = 'Who ' + r.fact + '?';
     qf.classList.add('hidden');
   }
+  document.getElementById('faces-question').textContent = qText;
   let names = fSet.map(p => p.n);
   if (names.length > 4) names = shuffle(names.filter(n => n !== r.p.n)).slice(0, 3).concat(r.p.n);
   names = shuffle(names.slice());
   const box = document.getElementById('faces-opts');
   box.innerHTML = '';
   names.forEach((n) => {
+    // each answer row has a 🔊 that says the name, for kids who can't read yet
+    const row = document.createElement('div');
+    row.className = 'opt-row';
+    const s = document.createElement('button');
+    s.className = 'say-btn'; s.textContent = '🔊';
+    s.onclick = (e) => { e.stopPropagation(); say(n); };
     const b = document.createElement('button');
     b.className = 'opt-btn'; b.textContent = n;
     b.onclick = () => facesAnswer(b, n === r.p.n, r.p.n);
-    box.appendChild(b);
+    row.appendChild(s); row.appendChild(b);
+    box.appendChild(row);
   });
+  say(qText); // question read aloud automatically
 }
 function facesAnswer(btn, ok, correctName) {
   document.querySelectorAll('#faces-opts .opt-btn').forEach((b) => {
     b.disabled = true;
     if (b.textContent === correctName) b.classList.add('right');
   });
-  if (ok) { fScore++; sMatch(); } else { btn.classList.add('wrong'); sWrong(); }
+  document.querySelectorAll('#faces-opts .say-btn').forEach((b) => { b.disabled = true; });
+  if (ok) { fScore++; sMatch(); say('Yes! That’s ' + correctName + '!'); }
+  else { btn.classList.add('wrong'); sWrong(); say('That was ' + correctName + '.'); }
   later(() => {
     fIdx++;
     if (fIdx < fRounds.length) facesShowQ();
@@ -1297,6 +1425,270 @@ function oddAnswer(btn, ok, r) {
 }
 
 /* =====================================================
+   MATH — equations by grade (K–3rd), endless variety
+   ===================================================== */
+function rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+const COUNTERS = ['🍎','⭐','🎈','🐟','🍪','🌸'];
+function mathGen() {
+  let q = '', ans = 0, emoji = '', spoken = '';
+  if (grade === 0) { // Kindergarten
+    if (level === 0) { // counting
+      const n = rnd(1, 5), f = COUNTERS[rnd(0, 5)];
+      ans = n; q = 'How many?'; emoji = f.repeat(n); spoken = 'Count them! How many do you see?';
+    } else if (level === 1) { // addition within 8, with pictures
+      const a = rnd(1, 4), b = rnd(1, 4), f = COUNTERS[rnd(0, 5)];
+      ans = a + b; q = a + ' + ' + b + ' = ?'; emoji = f.repeat(a) + '  ' + f.repeat(b);
+      spoken = a + ' plus ' + b;
+    } else { // add/subtract within 10
+      if (Math.random() < 0.5) { const a = rnd(2, 10), b = rnd(1, a - 1); ans = a - b; q = a + ' − ' + b + ' = ?'; spoken = a + ' minus ' + b; }
+      else { const a = rnd(2, 6), b = rnd(1, 4); ans = a + b; q = a + ' + ' + b + ' = ?'; spoken = a + ' plus ' + b; }
+    }
+  } else if (grade === 1) { // 1st grade
+    if (level === 0) { const a = rnd(2, 8), b = rnd(1, 10 - a > 1 ? 10 - a : 2); ans = a + b; q = a + ' + ' + b + ' = ?'; spoken = a + ' plus ' + b; }
+    else if (level === 1) {
+      if (Math.random() < 0.5) { const a = rnd(5, 15), b = rnd(2, 20 - a > 2 ? 20 - a : 3); ans = a + b; q = a + ' + ' + b + ' = ?'; spoken = a + ' plus ' + b; }
+      else { const a = rnd(8, 20), b = rnd(2, a - 1); ans = a - b; q = a + ' − ' + b + ' = ?'; spoken = a + ' minus ' + b; }
+    } else { // missing number
+      const a = rnd(2, 12), c = a + rnd(2, 8);
+      ans = c - a; q = a + ' + ▢ = ' + c; spoken = a + ' plus what makes ' + c + '?';
+    }
+  } else if (grade === 2) { // 2nd grade
+    if (level === 0) { const a = rnd(11, 89), b = rnd(2, 9); ans = a + b; q = a + ' + ' + b + ' = ?'; spoken = a + ' plus ' + b; }
+    else if (level === 1) {
+      if (Math.random() < 0.5) { const a = rnd(12, 60), b = rnd(11, 99 - a > 11 ? 99 - a : 12); ans = a + b; q = a + ' + ' + b + ' = ?'; spoken = a + ' plus ' + b; }
+      else { const a = rnd(30, 99), b = rnd(11, a - 5); ans = a - b; q = a + ' − ' + b + ' = ?'; spoken = a + ' minus ' + b; }
+    } else {
+      if (Math.random() < 0.5) { const a = rnd(5, 30), b = rnd(5, 30), c = rnd(5, 30); ans = a + b + c; q = a + ' + ' + b + ' + ' + c + ' = ?'; spoken = a + ' plus ' + b + ' plus ' + c; }
+      else { const a = rnd(15, 60), c = a + rnd(10, 39); ans = c - a; q = a + ' + ▢ = ' + c; spoken = a + ' plus what makes ' + c + '?'; }
+    }
+  } else { // 3rd grade
+    if (level === 0) { const m = [2, 5, 10][rnd(0, 2)], n = rnd(2, 9); ans = m * n; q = n + ' × ' + m + ' = ?'; spoken = n + ' times ' + m; }
+    else if (level === 1) { const a = rnd(3, 9), b = rnd(3, 9); ans = a * b; q = a + ' × ' + b + ' = ?'; spoken = a + ' times ' + b; }
+    else {
+      if (Math.random() < 0.5) { const n = rnd(2, 9), qt = rnd(2, 9); ans = qt; q = (n * qt) + ' ÷ ' + n + ' = ?'; spoken = (n * qt) + ' divided by ' + n; }
+      else { const a = rnd(4, 9), b = rnd(6, 9); ans = a * b; q = a + ' × ' + b + ' = ?'; spoken = a + ' times ' + b; }
+    }
+  }
+  return { q, ans, emoji, spoken };
+}
+function mathOpts(ans) {
+  const s = new Set([ans]);
+  let guard = 0;
+  while (s.size < 4 && guard++ < 50) {
+    const d = ans + [-10, -3, -2, -1, 1, 2, 3, 10][rnd(0, 7)];
+    if (d >= 0 && d !== ans) s.add(d);
+  }
+  while (s.size < 4) s.add(ans + s.size);
+  return shuffle([...s]);
+}
+let mqIdx = 0, mqScore = 0, mqCur = null;
+function mathKey() { return 'mathBest_' + grade + '_' + level; }
+function mathOpen() {
+  stopAll(); hideWin();
+  mqIdx = 0; mqScore = 0;
+  document.getElementById('math-title').textContent = '➕ ' + GRADES[grade];
+  document.getElementById('math-score').textContent = '0';
+  document.getElementById('math-best').textContent = localStorage.getItem(mathKey()) || '–';
+  show('math');
+  mathQ();
+}
+function mathQ() {
+  mqCur = mathGen();
+  document.getElementById('math-idx').textContent = mqIdx + 1;
+  document.getElementById('math-q').textContent = mqCur.q;
+  document.getElementById('math-emoji').textContent = mqCur.emoji;
+  const box = document.getElementById('math-opts');
+  box.innerHTML = '';
+  mathOpts(mqCur.ans).forEach((n) => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn'; b.textContent = n;
+    b.onclick = () => mathAnswer(b, n === mqCur.ans);
+    box.appendChild(b);
+  });
+  if (grade <= 1) mathSay(); // read aloud for the little ones
+}
+function mathSay() { if (mqCur) say(mqCur.spoken); }
+function mathAnswer(btn, ok) {
+  document.querySelectorAll('#math-opts .opt-btn').forEach((b) => {
+    b.disabled = true;
+    if (parseInt(b.textContent) === mqCur.ans) b.classList.add('right');
+  });
+  if (ok) { mqScore++; sMatch(); } else { btn.classList.add('wrong'); sWrong(); say('The answer is ' + mqCur.ans); }
+  document.getElementById('math-score').textContent = mqScore;
+  later(() => {
+    mqIdx++;
+    if (mqIdx < 10) mathQ();
+    else {
+      const b = bestOf(mathKey(), mqScore);
+      document.getElementById('math-best').textContent = b.best;
+      const stars = mqScore >= 9 ? 3 : mqScore >= 7 ? 2 : 1;
+      showWin(stars,
+        '<p>You solved <b>' + mqScore + ' of 10</b>!</p>' +
+        (b.isNew ? '<p class="new-best">🏆 New best!</p>' : '<p>Your best: ' + b.best + '</p>'),
+        mathOpen, stars === 3 ? '🎉 Math star!' : '➕ Well done!');
+    }
+  }, ok ? 900 : 1600);
+}
+
+/* =====================================================
+   WRITING — trace letters, words, then sentences
+   ===================================================== */
+const WRITE_SETS = [
+  { type:'letters', pools:['LITEFH','COUSJP','QRKGBD'] },                                 // K: uppercase
+  { type:'letters', pools:['iltoce','asunmr','gqkbdy'] },                                 // 1st: lowercase
+  { type:'words', pools:[['CAT','DOG','SUN','HAT','PIG','BUG'],['FROG','STAR','MOON','FISH','CAKE','BIRD'],['ROCKET','PLANET','DRAGON','CASTLE','WINTER']] },
+  { type:'sentences', pools:[['I CAN RUN','WE GO UP','IT IS FUN'],['THE CAT NAPS','BIRDS CAN FLY','I LIKE BOOKS'],['DRAGONS BREATHE FIRE','ROCKETS FLY TO SPACE','MY DOG DIGS HOLES']] }
+];
+let wUnits = [], wUnit = 0, wChar = 0, wTries = 0, wFirstTry = 0, wSkips = 0, wTotal = 0;
+let tCtx = null, tMask = null, tMaskCtx = null, tDrawing = false, tHasInk = false;
+const TSIZE = 320;
+function writeOpen() {
+  stopAll(); hideWin();
+  const set = WRITE_SETS[grade];
+  if (set.type === 'letters') {
+    wUnits = shuffle(set.pools[level].split('')).slice(0, 5);
+  } else if (set.type === 'words') {
+    wUnits = shuffle(set.pools[level].slice()).slice(0, level === 0 ? 3 : 2);
+  } else {
+    wUnits = shuffle(set.pools[level].slice()).slice(0, 1);
+  }
+  wUnit = 0; wChar = 0; wTries = 0; wFirstTry = 0; wSkips = 0;
+  wTotal = wUnits.join('').replace(/ /g, '').length;
+  document.getElementById('write-title').textContent = '✏️ ' + GRADES[grade];
+  writeSetupCanvas();
+  show('write');
+  writeShow();
+}
+function writeSetupCanvas() {
+  const c = document.getElementById('trace');
+  const dpr = window.devicePixelRatio || 1;
+  c.width = TSIZE * dpr; c.height = TSIZE * dpr;
+  c.style.width = TSIZE + 'px'; c.style.height = TSIZE + 'px';
+  tCtx = c.getContext('2d');
+  tCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  tMask = document.createElement('canvas');
+  tMask.width = TSIZE; tMask.height = TSIZE;
+  tMaskCtx = tMask.getContext('2d');
+  if (!c._wired) {
+    c._wired = true;
+    const pos = (e) => {
+      const r = c.getBoundingClientRect();
+      return [ (e.clientX - r.left) * (TSIZE / r.width), (e.clientY - r.top) * (TSIZE / r.height) ];
+    };
+    c.addEventListener('pointerdown', (e) => {
+      e.preventDefault(); tDrawing = true; tHasInk = true;
+      const [x, y] = pos(e);
+      [tCtx, tMaskCtx].forEach(cx => { cx.beginPath(); cx.moveTo(x, y); });
+      c.setPointerCapture(e.pointerId);
+    });
+    c.addEventListener('pointermove', (e) => {
+      if (!tDrawing) return;
+      e.preventDefault();
+      const [x, y] = pos(e);
+      [tCtx, tMaskCtx].forEach(cx => {
+        cx.lineTo(x, y);
+        cx.lineWidth = 20; cx.lineCap = 'round'; cx.lineJoin = 'round';
+        cx.strokeStyle = '#7c3aed';
+        cx.stroke();
+      });
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => c.addEventListener(ev, () => { tDrawing = false; }));
+  }
+}
+function writeChars() { return wUnits[wUnit].replace(/ /g, ''); }
+function writeCurChar() { return writeChars()[wChar]; }
+function writeGuide() {
+  const ch = writeCurChar();
+  tCtx.clearRect(0, 0, TSIZE, TSIZE);
+  tMaskCtx.clearRect(0, 0, TSIZE, TSIZE);
+  tHasInk = false;
+  // guide lines
+  tCtx.strokeStyle = 'rgba(124,58,237,0.25)'; tCtx.lineWidth = 2; tCtx.setLineDash([8, 8]);
+  [70, 250].forEach(y => { tCtx.beginPath(); tCtx.moveTo(20, y); tCtx.lineTo(300, y); tCtx.stroke(); });
+  tCtx.setLineDash([]);
+  // the letter to trace
+  tCtx.font = "bold 230px 'Chalkboard SE','Comic Sans MS',sans-serif";
+  tCtx.textAlign = 'center'; tCtx.textBaseline = 'middle';
+  tCtx.fillStyle = 'rgba(124,58,237,0.16)';
+  tCtx.fillText(ch, TSIZE / 2, TSIZE / 2 + 8);
+  tCtx.strokeStyle = 'rgba(124,58,237,0.45)'; tCtx.lineWidth = 2;
+  tCtx.strokeText(ch, TSIZE / 2, TSIZE / 2 + 8);
+}
+function writeShow() {
+  wTries = 0;
+  // progress + word display with current letter highlighted
+  const unit = wUnits[wUnit];
+  let out = '', ci = 0;
+  for (const ch of unit) {
+    if (ch === ' ') { out += '&nbsp;&nbsp;'; continue; }
+    out += '<span class="' + (ci < wChar ? 'done-ch' : ci === wChar ? 'cur' : '') + '">' + ch + '</span>';
+    ci++;
+  }
+  document.getElementById('write-target').innerHTML = out;
+  document.getElementById('write-prog').textContent = (wUnit + 1) + ' of ' + wUnits.length;
+  document.getElementById('write-status').textContent = 'Trace the letter with your finger!';
+  writeGuide();
+  writeSay();
+}
+function writeSay() {
+  const set = WRITE_SETS[grade];
+  if (set.type === 'letters') say('Trace the letter ' + writeCurChar());
+  else say(wUnits[wUnit] + '. Trace the letter ' + writeCurChar());
+}
+function writeClear() { writeGuide(); }
+function writeCheck() {
+  if (!tHasInk) { document.getElementById('write-status').textContent = 'Draw the letter first! ✏️'; return; }
+  // build letter mask and measure coverage
+  const m = document.createElement('canvas');
+  m.width = TSIZE; m.height = TSIZE;
+  const mc = m.getContext('2d');
+  mc.font = "bold 230px 'Chalkboard SE','Comic Sans MS',sans-serif";
+  mc.textAlign = 'center'; mc.textBaseline = 'middle';
+  mc.lineWidth = 22; mc.strokeStyle = '#000'; mc.fillStyle = '#000';
+  mc.fillText(writeCurChar(), TSIZE / 2, TSIZE / 2 + 8);
+  mc.strokeText(writeCurChar(), TSIZE / 2, TSIZE / 2 + 8); // fatten the target zone
+  const letter = mc.getImageData(0, 0, TSIZE, TSIZE).data;
+  const ink = tMaskCtx.getImageData(0, 0, TSIZE, TSIZE).data;
+  let letterPix = 0, covered = 0, stray = 0;
+  for (let i = 3; i < letter.length; i += 8) { // sample every 2nd pixel
+    const isLetter = letter[i] > 40, hasInk = ink[i] > 40;
+    if (isLetter) { letterPix++; if (hasInk) covered++; }
+    else if (hasInk) stray++;
+  }
+  const cov = letterPix ? covered / letterPix : 0;
+  const strayRatio = stray / (covered + 1);
+  if (cov >= 0.45 && strayRatio < 2.2) {
+    if (wTries === 0) wFirstTry++;
+    sMatch();
+    say(Math.random() < 0.5 ? 'Great job!' : 'Beautiful!');
+    writeNext();
+  } else {
+    wTries++;
+    sWrong();
+    document.getElementById('write-status').textContent =
+      cov < 0.45 ? 'Almost! Cover the whole letter. 💪' : 'Try to stay on the letter! 🎯';
+  }
+}
+function writeSkip() { wSkips++; writeNext(); }
+function writeNext() {
+  wChar++;
+  if (wChar >= writeChars().length) {
+    const set = WRITE_SETS[grade];
+    if (set.type !== 'letters') say('You wrote ' + wUnits[wUnit] + '!');
+    wUnit++; wChar = 0;
+    if (wUnit >= wUnits.length) {
+      const stars = (wSkips === 0 && wFirstTry >= Math.ceil(wTotal * 0.7)) ? 3 : wSkips === 0 ? 2 : 1;
+      showWin(stars,
+        '<p>You traced <b>' + (wTotal - wSkips) + ' of ' + wTotal + '</b> letters!</p>' +
+        (wFirstTry === wTotal ? '<p class="new-best">Perfect on the first try! 🏆</p>' : ''),
+        writeOpen, stars === 3 ? '🎉 Super writer!' : '✏️ Nice writing!');
+      return;
+    }
+  }
+  writeShow();
+}
+
+/* =====================================================
    NAVIGATION
    ===================================================== */
 document.querySelectorAll('.mode-btn[data-mode]').forEach(b =>
@@ -1306,6 +1698,8 @@ document.querySelectorAll('.mode-btn[data-mode]').forEach(b =>
   }));
 document.querySelectorAll('.mode-btn[data-game]').forEach(b =>
   b.addEventListener('click', () => openDiff(b.dataset.game, DIFF_TITLES[b.dataset.game])));
+document.querySelectorAll('.mode-btn[data-school]').forEach(b =>
+  b.addEventListener('click', () => openGrade(b.dataset.school)));
 
 // ---------- PWA service worker ----------
 if ('serviceWorker' in navigator) {

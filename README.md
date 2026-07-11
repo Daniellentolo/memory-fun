@@ -24,6 +24,13 @@ Memory and brain-training games for kids aged 6–10. Ten games, each with Easy 
 | 👀 What's Missing? | Study a group of things, spot which one disappeared — visual attention |
 | 🕵️ Odd One Out | Which one doesn't belong? — an endless run that climbs from easy to expert puzzles until you miss |
 
+**School games** (pick your grade — Kindergarten to 3rd — then Easy/Medium/Hard):
+
+| Mode | What kids practice |
+|---|---|
+| ➕ Math | Counting with pictures (K) up to multiplication and division (3rd), read aloud for little ones |
+| ✏️ Writing | Finger-trace letters (K–1st), words (2nd), and sentences (3rd) on the screen |
+
 Research on working-memory training in children suggests short daily practice (5–10 minutes) over several weeks is what makes a difference — Number Recall, Grid Memory, and Copy Me are game versions of the tasks used in those studies.
 
 Answers are big tap buttons (no typing), stories can be read aloud, and best scores are saved on the device per game and level.
