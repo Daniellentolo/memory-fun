@@ -1,5 +1,5 @@
 // Memory Fun! service worker — offline support that never shows a stale game
-const CACHE = 'memory-fun-v8';
+const CACHE = 'memory-fun-v9';
 const FILES = [
   './',
   './index.html',
