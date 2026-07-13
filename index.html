@@ -260,7 +260,7 @@
     <button class="mode-btn m-odd" data-game="odd"><span class="big">🕵️</span>Odd One Out<small>Which one doesn't belong?</small></button>
   </div>
 
-  <div class="section-label">🏫 School Games</div>
+  <div class="section-label">🎓 Learning Games</div>
   <div class="mode-grid">
     <button class="mode-btn m-math" data-school="math"><span class="big">➕</span>Math<small>Equations for your grade</small></button>
     <button class="mode-btn m-write" data-school="write"><span class="big">✏️</span>Writing<small>Trace letters, words & sentences</small></button>
@@ -271,7 +271,7 @@
 <!-- ============ DIFFICULTY (shared by all games) ============ -->
 <section id="diff" class="screen">
   <div class="screen-head">
-    <button class="back-btn" onclick="show('menu')">⬅ Back</button>
+    <button class="back-btn" onclick="diffBack()">⬅ Back</button>
     <h2 id="diff-title">Choose your level</h2>
     <span style="width:70px"></span>
   </div>
@@ -484,10 +484,13 @@
     <div class="write-target" id="write-target"></div>
     <canvas id="trace" width="320" height="320"></canvas>
     <div class="write-btns">
-      <button class="w-say" onclick="writeSay()">🔊</button>
-      <button class="w-clear" onclick="writeClear()">↺ Clear</button>
-      <button class="w-skip" onclick="writeSkip()">⏭ Skip</button>
-      <button class="w-done" onclick="writeCheck()">✓ Done!</button>
+      <button class="w-say" id="wb-say" onclick="writeSay()">🔊</button>
+      <button class="w-clear" id="wb-replay" onclick="writeWatch()">▶ Replay</button>
+      <button class="w-done" id="wb-next" onclick="writeFollow()">Next ▶</button>
+      <button class="w-say" id="wb-hint" onclick="writeHint()">💡 Hint</button>
+      <button class="w-clear" id="wb-clear" onclick="writeClear()">↺ Clear</button>
+      <button class="w-skip" id="wb-skip" onclick="writeSkip()">⏭ Skip</button>
+      <button class="w-done" id="wb-done" onclick="writeCheck()">✓ Done!</button>
     </div>
     <div class="write-status" id="write-status"></div>
   </div>
@@ -605,6 +608,11 @@ function openDiff(game, title) {
   document.getElementById('diff-title').textContent = title;
   cfg.labels.forEach((l, i) => document.getElementById('dl' + i).textContent = l);
   show('diff');
+}
+function diffBack() {
+  // Math & Writing came from the grade picker, so Back returns there
+  if (pending === 'math' || pending === 'write') show('grade');
+  else show('menu');
 }
 function launch(lvl) {
   level = lvl; audio();
@@ -1499,21 +1507,27 @@ function mathQ() {
   document.getElementById('math-emoji').textContent = mqCur.emoji;
   const box = document.getElementById('math-opts');
   box.innerHTML = '';
-  mathOpts(mqCur.ans).forEach((n) => {
+  const opts = mathOpts(mqCur.ans);
+  // K & 1st: the choices are read aloud too, so pre-readers can play alone
+  if (grade <= 1) mqCur.spoken += '. Is it ' + opts.slice(0, -1).join(', ') + ', or ' + opts[opts.length - 1] + '?';
+  opts.forEach((n) => {
     const b = document.createElement('button');
     b.className = 'opt-btn'; b.textContent = n;
-    b.onclick = () => mathAnswer(b, n === mqCur.ans);
+    b.onclick = () => mathAnswer(b, n === mqCur.ans, n);
     box.appendChild(b);
   });
-  if (grade <= 1) mathSay(); // read aloud for the little ones
+  if (grade <= 1) mathSay();
 }
 function mathSay() { if (mqCur) say(mqCur.spoken); }
-function mathAnswer(btn, ok) {
+function mathAnswer(btn, ok, n) {
   document.querySelectorAll('#math-opts .opt-btn').forEach((b) => {
     b.disabled = true;
     if (parseInt(b.textContent) === mqCur.ans) b.classList.add('right');
   });
-  if (ok) { mqScore++; sMatch(); } else { btn.classList.add('wrong'); sWrong(); say('The answer is ' + mqCur.ans); }
+  if (ok) { mqScore++; sMatch(); } else { btn.classList.add('wrong'); sWrong(); }
+  // learning through repetition: the kid hears their pick, and the correct answer on mistakes
+  if (grade <= 1) say('You picked ' + n + '. ' + (ok ? 'That’s right!' : 'The answer is ' + mqCur.ans + '.'));
+  else if (!ok) say('The answer is ' + mqCur.ans);
   document.getElementById('math-score').textContent = mqScore;
   later(() => {
     mqIdx++;
@@ -1527,7 +1541,7 @@ function mathAnswer(btn, ok) {
         (b.isNew ? '<p class="new-best">🏆 New best!</p>' : '<p>Your best: ' + b.best + '</p>'),
         mathOpen, stars === 3 ? '🎉 Math star!' : '➕ Well done!');
     }
-  }, ok ? 900 : 1600);
+  }, ok ? (grade <= 1 ? 1700 : 900) : 2500); // extra time to hear the spoken answer
 }
 
 /* =====================================================
@@ -1539,22 +1553,152 @@ const WRITE_SETS = [
   { type:'words', pools:[['CAT','DOG','SUN','HAT','PIG','BUG'],['FROG','STAR','MOON','FISH','CAKE','BIRD'],['ROCKET','PLANET','DRAGON','CASTLE','WINTER']] },
   { type:'sentences', pools:[['I CAN RUN','WE GO UP','IT IS FUN'],['THE CAT NAPS','BIRDS CAN FLY','I LIKE BOOKS'],['DRAGONS BREATHE FIRE','ROCKETS FLY TO SPACE','MY DOG DIGS HOLES']] }
 ];
-let wUnits = [], wUnit = 0, wChar = 0, wTries = 0, wFirstTry = 0, wSkips = 0, wTotal = 0;
-let tCtx = null, tMask = null, tMaskCtx = null, tDrawing = false, tHasInk = false;
+// Three phases, like learning Chinese characters: 1) WATCH the letter being
+// written stroke by stroke, 2) FOLLOW numbered arrows while tracing,
+// 3) SOLO tracing with a Hint button. Words & sentences are traced whole.
+let wUnits = [], wUnit = 0, wPhase = 0, wTries = 0, wFirstTry = 0, wSkips = 0, wTotal = 0;
+let tCtx = null, tMask = null, tMaskCtx = null, tDrawing = false, tHasInk = false, tInkW = 20, tCanDraw = false;
 const TSIZE = 320;
+const WAREA = { x: 30, y: 25, s: 260 }; // letter box 0-100 mapped into canvas
+
+// ---- stroke-order data (100x100 box, y goes down), school-style order ----
+function arc(cx, cy, rx, ry, d0, d1, n) {
+  n = n || 16; const out = [];
+  for (let i = 0; i <= n; i++) {
+    const d = (d0 + (d1 - d0) * i / n) * Math.PI / 180;
+    out.push([cx + rx * Math.cos(d), cy + ry * Math.sin(d)]);
+  }
+  return out;
+}
+const STROKES = {
+  A: [[[50,10],[20,90]], [[50,10],[80,90]], [[32,62],[68,62]]],
+  B: [[[27,10],[27,90]], [[27,10],[50,10]].concat(arc(50,29,20,19,-90,90), [[27,48]]), [[27,48],[52,48]].concat(arc(52,69,22,21,-90,90), [[27,90]])],
+  C: [arc(55,50,33,40,-50,-310)],
+  D: [[[27,10],[27,90]], [[27,10],[42,10]].concat(arc(42,50,32,40,-90,90), [[27,90]])],
+  E: [[[28,10],[28,90]], [[28,10],[72,10]], [[28,50],[62,50]], [[28,90],[72,90]]],
+  F: [[[28,10],[28,90]], [[28,10],[72,10]], [[28,50],[60,50]]],
+  G: [arc(55,50,33,40,-50,-310), [[52,58],[80,58]]],
+  H: [[[26,10],[26,90]], [[74,10],[74,90]], [[26,50],[74,50]]],
+  I: [[[35,10],[65,10]], [[50,10],[50,90]], [[35,90],[65,90]]],
+  J: [[[62,10],[62,72]].concat(arc(46,72,16,17,0,180))],
+  K: [[[27,10],[27,90]], [[72,10],[27,52]], [[40,42],[74,90]]],
+  L: [[[30,10],[30,90],[72,90]]],
+  M: [[[20,90],[20,10]], [[20,10],[50,58]], [[50,58],[80,10]], [[80,10],[80,90]]],
+  N: [[[26,90],[26,10]], [[26,10],[74,90]], [[74,90],[74,10]]],
+  O: [arc(50,50,32,40,-90,270)],
+  P: [[[27,10],[27,90]], [[27,10],[50,10]].concat(arc(50,30,22,20,-90,90), [[27,50]])],
+  Q: [arc(50,50,32,40,-90,270), [[58,66],[80,92]]],
+  R: [[[27,10],[27,90]], [[27,10],[50,10]].concat(arc(50,30,22,20,-90,90), [[27,50]]), [[48,50],[76,90]]],
+  S: [[[72,20],[58,11],[40,12],[30,24],[36,38],[52,46],[66,54],[73,67],[66,82],[46,90],[28,83]]],
+  T: [[[22,10],[78,10]], [[50,10],[50,90]]],
+  U: [[[26,10],[26,58]].concat(arc(50,58,24,30,180,0), [[74,10]])],
+  V: [[[20,10],[50,90]], [[50,90],[80,10]]],
+  W: [[[15,10],[33,90]], [[33,90],[50,34]], [[50,34],[67,90]], [[67,90],[85,10]]],
+  X: [[[24,10],[76,90]], [[76,10],[24,90]]],
+  Y: [[[22,10],[50,48]], [[78,10],[50,48]], [[50,48],[50,90]]],
+  Z: [[[24,10],[76,10],[24,90],[76,90]]],
+  a: [arc(46,67,19,22,-90,270), [[65,45],[65,90]]],
+  b: [[[30,10],[30,90]], arc(49,68,19,22,-90,270)],
+  c: [arc(52,68,20,22,-45,-315)],
+  d: [[[68,10],[68,90]], arc(49,68,19,22,-90,270)],
+  e: [[[30,66],[70,66]], arc(50,68,20,22,0,-290)],
+  f: [[[66,16],[56,10],[47,13],[44,24],[44,90]], [[30,45],[60,45]]],
+  g: [arc(48,64,19,20,-90,270), [[67,45],[67,96]].concat(arc(53,96,14,12,0,150))],
+  h: [[[30,10],[30,90]], [[30,64]].concat(arc(48,64,18,18,-180,0), [[66,90]])],
+  i: [[[50,45],[50,90]], [[50,28],[50,30]]],
+  j: [[[56,45],[56,96]].concat(arc(43,96,13,12,0,150)), [[56,28],[56,30]]],
+  k: [[[30,10],[30,90]], [[60,45],[32,68]], [[41,61],[64,90]]],
+  l: [[[50,10],[50,90]]],
+  m: [[[25,45],[25,90]], [[25,62]].concat(arc(37,62,12,14,-180,0), [[49,90]]), [[49,62]].concat(arc(61,62,12,14,-180,0), [[73,90]])],
+  n: [[[30,45],[30,90]], [[30,62]].concat(arc(48,62,18,16,-180,0), [[66,90]])],
+  o: [arc(50,68,20,22,-90,270)],
+  p: [[[30,45],[30,104]], arc(49,67,19,21,-90,270)],
+  q: [arc(48,67,19,21,-90,270), [[67,45],[67,104]]],
+  r: [[[35,45],[35,90]], [[35,60]].concat(arc(50,62,15,15,-180,-30))],
+  s: [[[64,50],[50,44],[37,48],[35,57],[45,63],[58,68],[64,76],[58,85],[42,87],[33,81]]],
+  t: [[[48,20],[48,84],[60,88]], [[32,42],[64,42]]],
+  u: [[[30,45],[30,72]].concat(arc(46,72,16,17,180,0)), [[62,45],[62,90]]],
+  v: [[[32,45],[50,90]], [[50,90],[68,45]]],
+  w: [[[26,45],[38,90]], [[38,90],[50,58]], [[50,58],[62,90]], [[62,90],[74,45]]],
+  x: [[[32,45],[68,90]], [[68,45],[32,90]]],
+  y: [[[32,45],[50,84]], [[68,45],[42,104]]],
+  z: [[[32,45],[68,45],[32,90],[68,90]]]
+};
+
+// ---- canvas helpers ----
+function s2c(p) { return [WAREA.x + p[0] * WAREA.s / 100, WAREA.y + p[1] * WAREA.s / 100]; }
+function pathOn(cx2, pts, w, color) {
+  cx2.beginPath();
+  pts.forEach((p, i) => { const q = s2c(p); i ? cx2.lineTo(q[0], q[1]) : cx2.moveTo(q[0], q[1]); });
+  cx2.lineWidth = w; cx2.strokeStyle = color; cx2.lineCap = 'round'; cx2.lineJoin = 'round';
+  cx2.stroke();
+}
+function clearAll() {
+  tCtx.clearRect(0, 0, TSIZE, TSIZE);
+  tMaskCtx.clearRect(0, 0, TSIZE, TSIZE);
+  tHasInk = false;
+}
+function guideLines() {
+  tCtx.strokeStyle = 'rgba(124,58,237,0.22)'; tCtx.lineWidth = 2; tCtx.setLineDash([8, 8]);
+  [WAREA.y + WAREA.s * 0.1, WAREA.y + WAREA.s * 0.9].forEach(y => {
+    tCtx.beginPath(); tCtx.moveTo(16, y); tCtx.lineTo(TSIZE - 16, y); tCtx.stroke();
+  });
+  tCtx.setLineDash([]);
+}
+function letterStrokes() { return STROKES[wUnits[wUnit]] || []; }
+function drawLetterGuide(alpha) {
+  clearAll(); guideLines();
+  tInkW = 20;
+  letterStrokes().forEach(pts => pathOn(tCtx, pts, 26, 'rgba(124,58,237,' + alpha + ')'));
+}
+function drawArrowsOn(cx2) {
+  letterStrokes().forEach((pts, i) => {
+    const k = Math.max(1, Math.floor(pts.length * 0.6));
+    const p1 = s2c(pts[k]), p0 = s2c(pts[k - 1]);
+    const ang = Math.atan2(p1[1] - p0[1], p1[0] - p0[0]);
+    cx2.beginPath(); cx2.moveTo(p1[0], p1[1]);
+    cx2.lineTo(p1[0] - 15 * Math.cos(ang - 0.45), p1[1] - 15 * Math.sin(ang - 0.45));
+    cx2.lineTo(p1[0] - 15 * Math.cos(ang + 0.45), p1[1] - 15 * Math.sin(ang + 0.45));
+    cx2.closePath(); cx2.fillStyle = '#ef4444'; cx2.fill();
+    const s = s2c(pts[0]);
+    cx2.beginPath(); cx2.arc(s[0], s[1], 13, 0, 7); cx2.fillStyle = '#f59e0b'; cx2.fill();
+    cx2.fillStyle = '#fff'; cx2.font = 'bold 15px sans-serif';
+    cx2.textAlign = 'center'; cx2.textBaseline = 'middle';
+    cx2.fillText(i + 1, s[0], s[1]);
+  });
+}
+// words & sentences: whole text traced at once, wrapped one word per line
+function wordLayout() {
+  const unit = wUnits[wUnit];
+  const lines = WRITE_SETS[grade].type === 'sentences' ? unit.split(' ') : [unit];
+  const maxLen = Math.max.apply(null, lines.map(l => l.length));
+  const font = Math.max(34, Math.min(96, Math.floor(290 / (maxLen * 0.62)), Math.floor(250 / (lines.length * 1.1))));
+  return { lines, font };
+}
+function wordFont(font) { return "bold " + font + "px 'Chalkboard SE','Comic Sans MS',sans-serif"; }
+function drawWordGuide() {
+  clearAll();
+  const wl = wordLayout();
+  tInkW = Math.max(8, Math.round(wl.font * 0.16));
+  tCtx.font = wordFont(wl.font);
+  tCtx.textAlign = 'center'; tCtx.textBaseline = 'middle';
+  const lh = wl.font * 1.18, y0 = 160 - ((wl.lines.length - 1) * lh) / 2;
+  wl.lines.forEach((l, i) => {
+    tCtx.fillStyle = 'rgba(124,58,237,0.14)'; tCtx.fillText(l, 160, y0 + i * lh);
+    tCtx.strokeStyle = 'rgba(124,58,237,0.4)'; tCtx.lineWidth = 1.5; tCtx.strokeText(l, 160, y0 + i * lh);
+  });
+}
+
+// ---- game flow ----
+const WRITE_NAMES = ['Big Letters ABC', 'Small Letters abc', 'Words', 'Sentences'];
 function writeOpen() {
   stopAll(); hideWin();
   const set = WRITE_SETS[grade];
-  if (set.type === 'letters') {
-    wUnits = shuffle(set.pools[level].split('')).slice(0, 5);
-  } else if (set.type === 'words') {
-    wUnits = shuffle(set.pools[level].slice()).slice(0, level === 0 ? 3 : 2);
-  } else {
-    wUnits = shuffle(set.pools[level].slice()).slice(0, 1);
-  }
-  wUnit = 0; wChar = 0; wTries = 0; wFirstTry = 0; wSkips = 0;
-  wTotal = wUnits.join('').replace(/ /g, '').length;
-  document.getElementById('write-title').textContent = '✏️ ' + GRADES[grade];
+  if (set.type === 'letters') wUnits = shuffle(set.pools[level].split('')).slice(0, 5);
+  else if (set.type === 'words') wUnits = shuffle(set.pools[level].slice()).slice(0, level === 0 ? 3 : 2);
+  else wUnits = shuffle(set.pools[level].slice()).slice(0, 1);
+  wUnit = 0; wFirstTry = 0; wSkips = 0; wTotal = wUnits.length;
+  document.getElementById('write-title').textContent = '✏️ ' + WRITE_NAMES[grade];
   writeSetupCanvas();
   show('write');
   writeShow();
@@ -1573,117 +1717,166 @@ function writeSetupCanvas() {
     c._wired = true;
     const pos = (e) => {
       const r = c.getBoundingClientRect();
-      return [ (e.clientX - r.left) * (TSIZE / r.width), (e.clientY - r.top) * (TSIZE / r.height) ];
+      return [(e.clientX - r.left) * (TSIZE / r.width), (e.clientY - r.top) * (TSIZE / r.height)];
     };
     c.addEventListener('pointerdown', (e) => {
+      if (!tCanDraw) return;
       e.preventDefault(); tDrawing = true; tHasInk = true;
-      const [x, y] = pos(e);
-      [tCtx, tMaskCtx].forEach(cx => { cx.beginPath(); cx.moveTo(x, y); });
-      c.setPointerCapture(e.pointerId);
+      const q = pos(e);
+      [tCtx, tMaskCtx].forEach(cx => { cx.beginPath(); cx.moveTo(q[0], q[1]); });
+      try { c.setPointerCapture(e.pointerId); } catch (err) {}
     });
     c.addEventListener('pointermove', (e) => {
       if (!tDrawing) return;
       e.preventDefault();
-      const [x, y] = pos(e);
+      const q = pos(e);
       [tCtx, tMaskCtx].forEach(cx => {
-        cx.lineTo(x, y);
-        cx.lineWidth = 20; cx.lineCap = 'round'; cx.lineJoin = 'round';
+        cx.lineTo(q[0], q[1]);
+        cx.lineWidth = tInkW; cx.lineCap = 'round'; cx.lineJoin = 'round';
         cx.strokeStyle = '#7c3aed';
         cx.stroke();
       });
     });
-    ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => c.addEventListener(ev, () => { tDrawing = false; }));
+    ['pointerup', 'pointercancel'].forEach(ev => c.addEventListener(ev, (e) => {
+      if (!tDrawing) return;
+      // a single tap still leaves a dot (important for i and j!)
+      const q = pos(e);
+      [tCtx, tMaskCtx].forEach(cx => {
+        cx.lineTo(q[0] + 0.5, q[1] + 0.5);
+        cx.lineWidth = tInkW; cx.lineCap = 'round'; cx.strokeStyle = '#7c3aed';
+        cx.stroke();
+      });
+      tDrawing = false;
+    }));
   }
 }
-function writeChars() { return wUnits[wUnit].replace(/ /g, ''); }
-function writeCurChar() { return writeChars()[wChar]; }
-function writeGuide() {
-  const ch = writeCurChar();
-  tCtx.clearRect(0, 0, TSIZE, TSIZE);
-  tMaskCtx.clearRect(0, 0, TSIZE, TSIZE);
-  tHasInk = false;
-  // guide lines
-  tCtx.strokeStyle = 'rgba(124,58,237,0.25)'; tCtx.lineWidth = 2; tCtx.setLineDash([8, 8]);
-  [70, 250].forEach(y => { tCtx.beginPath(); tCtx.moveTo(20, y); tCtx.lineTo(300, y); tCtx.stroke(); });
-  tCtx.setLineDash([]);
-  // the letter to trace
-  tCtx.font = "bold 230px 'Chalkboard SE','Comic Sans MS',sans-serif";
-  tCtx.textAlign = 'center'; tCtx.textBaseline = 'middle';
-  tCtx.fillStyle = 'rgba(124,58,237,0.16)';
-  tCtx.fillText(ch, TSIZE / 2, TSIZE / 2 + 8);
-  tCtx.strokeStyle = 'rgba(124,58,237,0.45)'; tCtx.lineWidth = 2;
-  tCtx.strokeText(ch, TSIZE / 2, TSIZE / 2 + 8);
+function wBtns(list) {
+  ['say', 'replay', 'next', 'hint', 'clear', 'skip', 'done'].forEach(k =>
+    document.getElementById('wb-' + k).classList.toggle('hidden', !list.includes(k)));
 }
+function wStatus(t) { document.getElementById('write-status').textContent = t; }
 function writeShow() {
+  const set = WRITE_SETS[grade];
   wTries = 0;
-  // progress + word display with current letter highlighted
-  const unit = wUnits[wUnit];
-  let out = '', ci = 0;
-  for (const ch of unit) {
-    if (ch === ' ') { out += '&nbsp;&nbsp;'; continue; }
-    out += '<span class="' + (ci < wChar ? 'done-ch' : ci === wChar ? 'cur' : '') + '">' + ch + '</span>';
-    ci++;
+  const label = set.type === 'letters' ? 'Letter ' : set.type === 'words' ? 'Word ' : 'Sentence ';
+  document.getElementById('write-prog').textContent = label + (wUnit + 1) + ' of ' + wUnits.length;
+  document.getElementById('write-target').innerHTML = '<span class="cur">' + wUnits[wUnit] + '</span>';
+  if (set.type === 'letters') writeWatch();
+  else {
+    wPhase = 3; tCanDraw = true;
+    drawWordGuide();
+    wBtns(['say', 'clear', 'skip', 'done']);
+    wStatus('Trace all the letters, then tap Done!');
+    writeSay();
   }
-  document.getElementById('write-target').innerHTML = out;
-  document.getElementById('write-prog').textContent = (wUnit + 1) + ' of ' + wUnits.length;
-  document.getElementById('write-status').textContent = 'Trace the letter with your finger!';
-  writeGuide();
+}
+// Phase 1: WATCH the letter draw itself
+function writeWatch() {
+  stopAll();
+  wPhase = 0; tCanDraw = false;
+  wBtns(['say', 'replay', 'next']);
+  wStatus('👀 Watch how it’s written…');
+  drawLetterGuide(0.12);
+  let t = 400;
+  letterStrokes().forEach((pts) => {
+    for (let i = 1; i < pts.length; i++) {
+      const seg = [pts[i - 1], pts[i]];
+      later(() => pathOn(tCtx, seg, 14, '#7c3aed'), t);
+      t += Math.max(24, 560 / pts.length);
+    }
+    t += 380;
+  });
+  later(() => wStatus('See the order? Tap Next ▶'), t);
   writeSay();
+}
+// Phase 2: FOLLOW the numbered arrows
+function writeFollow() {
+  stopAll();
+  wPhase = 1; wTries = 0; tCanDraw = true;
+  wBtns(['say', 'clear', 'skip', 'done']);
+  wStatus('Follow the numbered arrows — start at 1️⃣!');
+  drawLetterGuide(0.15);
+  drawArrowsOn(tCtx);
+}
+// Phase 3: SOLO with a hint if they forget
+function writeSolo() {
+  wPhase = 2; wTries = 0; tCanDraw = true;
+  wBtns(['say', 'hint', 'clear', 'skip', 'done']);
+  wStatus('Now all by yourself! 💪');
+  drawLetterGuide(0.06);
+}
+function writeHint() {
+  drawLetterGuide(0.15);
+  drawArrowsOn(tCtx);
+  wStatus('Here’s a reminder — trace over it!');
+}
+function writeClear() {
+  if (WRITE_SETS[grade].type !== 'letters') { drawWordGuide(); return; }
+  if (wPhase === 1) { drawLetterGuide(0.15); drawArrowsOn(tCtx); }
+  else if (wPhase === 2) drawLetterGuide(0.06);
 }
 function writeSay() {
   const set = WRITE_SETS[grade];
-  if (set.type === 'letters') say('Trace the letter ' + writeCurChar());
-  else say(wUnits[wUnit] + '. Trace the letter ' + writeCurChar());
+  if (set.type === 'letters') say('The letter ' + wUnits[wUnit]);
+  else say(wUnits[wUnit]);
 }
-function writeClear() { writeGuide(); }
 function writeCheck() {
-  if (!tHasInk) { document.getElementById('write-status').textContent = 'Draw the letter first! ✏️'; return; }
-  // build letter mask and measure coverage
+  if (!tHasInk) { wStatus('Draw with your finger first! ✏️'); sWrong(); say('Draw the letters first!'); return; }
+  const set = WRITE_SETS[grade];
   const m = document.createElement('canvas');
   m.width = TSIZE; m.height = TSIZE;
   const mc = m.getContext('2d');
-  mc.font = "bold 230px 'Chalkboard SE','Comic Sans MS',sans-serif";
-  mc.textAlign = 'center'; mc.textBaseline = 'middle';
-  mc.lineWidth = 22; mc.strokeStyle = '#000'; mc.fillStyle = '#000';
-  mc.fillText(writeCurChar(), TSIZE / 2, TSIZE / 2 + 8);
-  mc.strokeText(writeCurChar(), TSIZE / 2, TSIZE / 2 + 8); // fatten the target zone
-  const letter = mc.getImageData(0, 0, TSIZE, TSIZE).data;
-  const ink = tMaskCtx.getImageData(0, 0, TSIZE, TSIZE).data;
-  let letterPix = 0, covered = 0, stray = 0;
-  for (let i = 3; i < letter.length; i += 8) { // sample every 2nd pixel
-    const isLetter = letter[i] > 40, hasInk = ink[i] > 40;
-    if (isLetter) { letterPix++; if (hasInk) covered++; }
-    else if (hasInk) stray++;
+  if (set.type === 'letters') {
+    letterStrokes().forEach(pts => pathOn(mc, pts, 32, '#000'));
+  } else {
+    const wl = wordLayout();
+    mc.font = wordFont(wl.font);
+    mc.textAlign = 'center'; mc.textBaseline = 'middle';
+    mc.fillStyle = '#000'; mc.strokeStyle = '#000'; mc.lineWidth = Math.max(6, wl.font * 0.12);
+    const lh = wl.font * 1.18, y0 = 160 - ((wl.lines.length - 1) * lh) / 2;
+    wl.lines.forEach((l, i) => { mc.fillText(l, 160, y0 + i * lh); mc.strokeText(l, 160, y0 + i * lh); });
   }
-  const cov = letterPix ? covered / letterPix : 0;
+  const target = mc.getImageData(0, 0, TSIZE, TSIZE).data;
+  const ink = tMaskCtx.getImageData(0, 0, TSIZE, TSIZE).data;
+  let targetPix = 0, covered = 0, stray = 0;
+  for (let i = 3; i < target.length; i += 8) {
+    const isT = target[i] > 40, isI = ink[i] > 40;
+    if (isT) { targetPix++; if (isI) covered++; }
+    else if (isI) stray++;
+  }
+  const cov = targetPix ? covered / targetPix : 0;
   const strayRatio = stray / (covered + 1);
-  if (cov >= 0.45 && strayRatio < 2.2) {
-    if (wTries === 0) wFirstTry++;
+  const need = set.type === 'letters' ? 0.5 : 0.4;
+  if (cov >= need && strayRatio < 2.6) {
     sMatch();
-    say(Math.random() < 0.5 ? 'Great job!' : 'Beautiful!');
+    if (set.type === 'letters' && wPhase === 1) {
+      say('Great! Now try it all by yourself!');
+      writeSolo();
+      return;
+    }
+    if (wTries === 0) wFirstTry++;
+    say(set.type === 'letters'
+      ? (Math.random() < 0.5 ? 'Great job!' : 'Beautiful!')
+      : 'You wrote ' + wUnits[wUnit] + '!');
     writeNext();
   } else {
     wTries++;
     sWrong();
-    document.getElementById('write-status').textContent =
-      cov < 0.45 ? 'Almost! Cover the whole letter. 💪' : 'Try to stay on the letter! 🎯';
+    if (cov < need) wStatus('Almost! Cover the whole ' + (set.type === 'letters' ? 'letter' : 'word') + '. 💪');
+    else wStatus('Try to stay on the lines! 🎯');
+    if (set.type === 'letters' && wPhase === 2 && wTries >= 2) wStatus('Forgot the shape? Tap 💡 Hint!');
   }
 }
 function writeSkip() { wSkips++; writeNext(); }
 function writeNext() {
-  wChar++;
-  if (wChar >= writeChars().length) {
-    const set = WRITE_SETS[grade];
-    if (set.type !== 'letters') say('You wrote ' + wUnits[wUnit] + '!');
-    wUnit++; wChar = 0;
-    if (wUnit >= wUnits.length) {
-      const stars = (wSkips === 0 && wFirstTry >= Math.ceil(wTotal * 0.7)) ? 3 : wSkips === 0 ? 2 : 1;
-      showWin(stars,
-        '<p>You traced <b>' + (wTotal - wSkips) + ' of ' + wTotal + '</b> letters!</p>' +
-        (wFirstTry === wTotal ? '<p class="new-best">Perfect on the first try! 🏆</p>' : ''),
-        writeOpen, stars === 3 ? '🎉 Super writer!' : '✏️ Nice writing!');
-      return;
-    }
+  wUnit++;
+  if (wUnit >= wUnits.length) {
+    const stars = (wSkips === 0 && wFirstTry >= Math.ceil(wTotal * 0.7)) ? 3 : wSkips === 0 ? 2 : 1;
+    showWin(stars,
+      '<p>You wrote <b>' + (wTotal - wSkips) + ' of ' + wTotal + '</b>!</p>' +
+      (wFirstTry === wTotal ? '<p class="new-best">Perfect on the first try! 🏆</p>' : ''),
+      writeOpen, stars === 3 ? '🎉 Super writer!' : '✏️ Nice writing!');
+    return;
   }
   writeShow();
 }
