@@ -294,6 +294,7 @@
     <button class="diff-btn" style="background:#22c55e" onclick="pickGrade(1)">📗 1st Grade</button>
     <button class="diff-btn" style="background:#3b82f6" onclick="pickGrade(2)">📘 2nd Grade</button>
     <button class="diff-btn" style="background:#8b5cf6" onclick="pickGrade(3)">📙 3rd Grade</button>
+    <button class="diff-btn" style="background:#ef4444" id="grade4-btn" onclick="pickGrade(4)">📕 4th Grade</button>
   </div>
 </section>
 
@@ -590,11 +591,13 @@ const DIFF_TITLES = {
   faces:'🤝 Who Is It?', missing:"👀 What's Missing?", odd:'🕵️ Odd One Out',
   math:'➕ Math', write:'✏️ Writing'
 };
-const GRADES = ['Kindergarten','1st Grade','2nd Grade','3rd Grade'];
+const GRADES = ['Kindergarten','1st Grade','2nd Grade','3rd Grade','4th Grade'];
 let schoolGame = 'math', grade = 0;
 function openGrade(g) {
   schoolGame = g;
   document.getElementById('grade-title').textContent = DIFF_TITLES[g];
+  // 4th grade exists for Math only (writing tops out at sentences)
+  document.getElementById('grade4-btn').classList.toggle('hidden', g === 'write');
   show('grade');
 }
 function pickGrade(i) {
@@ -1469,21 +1472,44 @@ function mathGen() {
       if (Math.random() < 0.5) { const a = rnd(5, 30), b = rnd(5, 30), c = rnd(5, 30); ans = a + b + c; q = a + ' + ' + b + ' + ' + c + ' = ?'; spoken = a + ' plus ' + b + ' plus ' + c; }
       else { const a = rnd(15, 60), c = a + rnd(10, 39); ans = c - a; q = a + ' + ▢ = ' + c; spoken = a + ' plus what makes ' + c + '?'; }
     }
-  } else { // 3rd grade
+  } else if (grade === 3) { // 3rd grade
     if (level === 0) { const m = [2, 5, 10][rnd(0, 2)], n = rnd(2, 9); ans = m * n; q = n + ' × ' + m + ' = ?'; spoken = n + ' times ' + m; }
     else if (level === 1) { const a = rnd(3, 9), b = rnd(3, 9); ans = a * b; q = a + ' × ' + b + ' = ?'; spoken = a + ' times ' + b; }
     else {
       if (Math.random() < 0.5) { const n = rnd(2, 9), qt = rnd(2, 9); ans = qt; q = (n * qt) + ' ÷ ' + n + ' = ?'; spoken = (n * qt) + ' divided by ' + n; }
       else { const a = rnd(4, 9), b = rnd(6, 9); ans = a * b; q = a + ' × ' + b + ' = ?'; spoken = a + ' times ' + b; }
     }
+  } else { // 4th grade — the tough stuff
+    if (level === 0) {
+      if (Math.random() < 0.5) { const a = rnd(12, 49), b = rnd(3, 9); ans = a * b; q = a + ' × ' + b + ' = ?'; spoken = a + ' times ' + b; }
+      else { const a = rnd(125, 850), b = rnd(100, 999 - a); ans = a + b; q = a + ' + ' + b + ' = ?'; spoken = a + ' plus ' + b; }
+    } else if (level === 1) {
+      const r = Math.random();
+      if (r < 0.34) { const a = rnd(300, 950), b = rnd(120, a - 100); ans = a - b; q = a + ' − ' + b + ' = ?'; spoken = a + ' minus ' + b; }
+      else if (r < 0.67) { const d = rnd(3, 9), qt = rnd(12, 25); ans = qt; q = (d * qt) + ' ÷ ' + d + ' = ?'; spoken = (d * qt) + ' divided by ' + d; }
+      else { const a = rnd(35, 99), b = rnd(4, 9); ans = a * b; q = a + ' × ' + b + ' = ?'; spoken = a + ' times ' + b; }
+    } else {
+      const r = Math.random();
+      if (r < 0.25) { const a = rnd(11, 25), b = rnd(11, 19); ans = a * b; q = a + ' × ' + b + ' = ?'; spoken = a + ' times ' + b; }
+      else if (r < 0.5) { const b = rnd(3, 9), qt = rnd(12, 19); ans = qt; q = '▢ × ' + b + ' = ' + (b * qt); spoken = 'What times ' + b + ' makes ' + (b * qt) + '?'; }
+      else if (r < 0.75) { const a = rnd(2, 20), b = rnd(3, 9), c2 = rnd(3, 9); ans = a + b * c2; q = a + ' + ' + b + ' × ' + c2 + ' = ?'; spoken = a + ' plus ' + b + ' times ' + c2 + '. Multiply first!'; }
+      else {
+        const fr = [['½', 'one half', 2, 1], ['⅓', 'one third', 3, 1], ['¼', 'one quarter', 4, 1], ['¾', 'three quarters', 4, 3]][rnd(0, 3)];
+        const n = rnd(2, 8) * fr[2];
+        ans = n / fr[2] * fr[3];
+        q = fr[0] + ' of ' + n + ' = ?'; spoken = fr[1] + ' of ' + n;
+      }
+    }
   }
   return { q, ans, emoji, spoken };
 }
 function mathOpts(ans) {
   const s = new Set([ans]);
+  // distractors scale with the answer so big numbers stay tricky
+  const offs = ans >= 100 ? [-100, -10, -3, -1, 1, 3, 10, 100] : [-10, -3, -2, -1, 1, 2, 3, 10];
   let guard = 0;
   while (s.size < 4 && guard++ < 50) {
-    const d = ans + [-10, -3, -2, -1, 1, 2, 3, 10][rnd(0, 7)];
+    const d = ans + offs[rnd(0, 7)];
     if (d >= 0 && d !== ans) s.add(d);
   }
   while (s.size < 4) s.add(ans + s.size);

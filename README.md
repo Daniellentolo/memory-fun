@@ -28,7 +28,7 @@ Memory and brain-training games for kids aged 6–10. Ten games, each with Easy 
 
 | Mode | What kids practice |
 |---|---|
-| ➕ Math | Counting with pictures (K) up to multiplication and division (3rd). For K–1st everything is spoken: the question, the choices, the kid's pick, and the correct answer |
+| ➕ Math | Counting with pictures (K) up to two-digit multiplication, order of operations, and fractions (4th). For K–1st everything is spoken: the question, the choices, the kid's pick, and the correct answer |
 | ✏️ Writing | Three steps like real handwriting class: watch the letter drawn stroke by stroke, trace it following numbered arrows, then write it solo (with a Hint button). K = big letters, 1st = small letters, 2nd = whole words, 3rd = whole sentences |
 
 Research on working-memory training in children suggests short daily practice (5–10 minutes) over several weeks is what makes a difference — Number Recall, Grid Memory, and Copy Me are game versions of the tasks used in those studies.
