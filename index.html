@@ -1522,10 +1522,29 @@ function mathOpts(ans) {
   return shuffle([...s]);
 }
 let mqIdx = 0, mqScore = 0, mqCur = null;
+let mqSession = new Set();   // no repeats within a single 10-question round
+let mqRecent = new Set();    // avoid questions from the last few rounds too
+// Questions are made up on the fly, so pick a fresh one each time: never repeat
+// inside a round, and skip anything seen recently when the pool allows.
+function mathPick() {
+  let pick = null;
+  for (let i = 0; i < 60; i++) {
+    const c = mathGen();
+    const sig = c.q + '|' + c.emoji + '|' + c.ans;
+    if (mqSession.has(sig)) continue;
+    pick = { c, sig };
+    if (!mqRecent.has(sig)) break;   // ideally new vs recent rounds as well
+  }
+  if (!pick) { const c = mathGen(); pick = { c, sig: c.q + '|' + c.emoji + '|' + c.ans }; }
+  mqSession.add(pick.sig);
+  mqRecent.add(pick.sig);
+  if (mqRecent.size > 40) mqRecent.delete(mqRecent.values().next().value);
+  return pick.c;
+}
 function mathKey() { return 'mathBest_' + grade + '_' + level; }
 function mathOpen() {
   stopAll(); hideWin();
-  mqIdx = 0; mqScore = 0;
+  mqIdx = 0; mqScore = 0; mqSession = new Set();
   document.getElementById('math-title').textContent = '➕ ' + GRADES[grade];
   document.getElementById('math-score').textContent = '0';
   document.getElementById('math-best').textContent = localStorage.getItem(mathKey()) || '–';
@@ -1533,7 +1552,7 @@ function mathOpen() {
   mathQ();
 }
 function mathQ() {
-  mqCur = mathGen();
+  mqCur = mathPick();
   document.getElementById('math-idx').textContent = mqIdx + 1;
   document.getElementById('math-q').textContent = mqCur.q;
   document.getElementById('math-emoji').textContent = mqCur.emoji;
@@ -1557,13 +1576,14 @@ function mathAnswer(btn, ok, n) {
     if (parseInt(b.textContent) === mqCur.ans) b.classList.add('right');
   });
   if (ok) { mqScore++; sMatch(); } else { btn.classList.add('wrong'); sWrong(); }
-  // learning through repetition: the kid hears their pick, and the correct answer on mistakes
+  // learning through repetition: K–1st hear their pick; every grade hears
+  // spoken answer feedback, slow and natural, on both right and wrong
   if (grade <= 1) say('You picked ' + n + '. … ' + (ok ? 'That’s right!' : 'The answer is ' + mqCur.ans + '.'), 0.8);
-  else if (!ok) say('The answer is ' + mqCur.ans, 0.8);
+  else say(ok ? 'That’s right!' : 'The answer is ' + mqCur.ans + '.', 0.8);
   document.getElementById('math-score').textContent = mqScore;
   // leave enough quiet time for the spoken feedback to finish before the next
   // question starts (otherwise it gets cut off and feels rushed)
-  const wait = grade <= 1 ? (ok ? 2800 : 3600) : (ok ? 1100 : 2600);
+  const wait = grade <= 1 ? (ok ? 2800 : 3600) : (ok ? 1600 : 2600);
   later(() => {
     mqIdx++;
     if (mqIdx < 10) mathQ();
