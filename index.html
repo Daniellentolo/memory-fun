@@ -544,12 +544,12 @@ function sWrong() { tone(160, 0.25, 0, 'sawtooth', 0.08); }
 function sWin()   { [N.C4,N.E4,N.G4,N.C5,N.E5,N.G5].forEach((f,k)=>tone(f,0.22,k*0.12,'triangle',0.25)); }
 
 // ---------- Speech ----------
-function say(text) {
+function say(text, rate) {
   try {
     if (!('speechSynthesis' in window)) return;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-US'; u.rate = 0.9;
+    u.lang = 'en-US'; u.rate = rate || 0.9; u.pitch = 1.05;
     speechSynthesis.speak(u);
   } catch (e) {}
 }
@@ -1541,7 +1541,7 @@ function mathQ() {
   box.innerHTML = '';
   const opts = mathOpts(mqCur.ans);
   // K & 1st: the choices are read aloud too, so pre-readers can play alone
-  if (grade <= 1) mqCur.spoken += '. Is it ' + opts.slice(0, -1).join(', ') + ', or ' + opts[opts.length - 1] + '?';
+  if (grade <= 1) mqCur.spoken += '. Is it, ' + opts.slice(0, -1).join(', … ') + ', … or ' + opts[opts.length - 1] + '?';
   opts.forEach((n) => {
     const b = document.createElement('button');
     b.className = 'opt-btn'; b.textContent = n;
@@ -1550,7 +1550,7 @@ function mathQ() {
   });
   if (grade <= 1) mathSay();
 }
-function mathSay() { if (mqCur) say(mqCur.spoken); }
+function mathSay() { if (mqCur) say(mqCur.spoken, 0.8); }
 function mathAnswer(btn, ok, n) {
   document.querySelectorAll('#math-opts .opt-btn').forEach((b) => {
     b.disabled = true;
@@ -1558,9 +1558,12 @@ function mathAnswer(btn, ok, n) {
   });
   if (ok) { mqScore++; sMatch(); } else { btn.classList.add('wrong'); sWrong(); }
   // learning through repetition: the kid hears their pick, and the correct answer on mistakes
-  if (grade <= 1) say('You picked ' + n + '. ' + (ok ? 'That’s right!' : 'The answer is ' + mqCur.ans + '.'));
-  else if (!ok) say('The answer is ' + mqCur.ans);
+  if (grade <= 1) say('You picked ' + n + '. … ' + (ok ? 'That’s right!' : 'The answer is ' + mqCur.ans + '.'), 0.8);
+  else if (!ok) say('The answer is ' + mqCur.ans, 0.8);
   document.getElementById('math-score').textContent = mqScore;
+  // leave enough quiet time for the spoken feedback to finish before the next
+  // question starts (otherwise it gets cut off and feels rushed)
+  const wait = grade <= 1 ? (ok ? 2800 : 3600) : (ok ? 1100 : 2600);
   later(() => {
     mqIdx++;
     if (mqIdx < 10) mathQ();
@@ -1573,7 +1576,7 @@ function mathAnswer(btn, ok, n) {
         (b.isNew ? '<p class="new-best">🏆 New best!</p>' : '<p>Your best: ' + b.best + '</p>'),
         mathOpen, stars === 3 ? '🎉 Math star!' : '➕ Well done!');
     }
-  }, ok ? (grade <= 1 ? 1700 : 900) : 2500); // extra time to hear the spoken answer
+  }, wait);
 }
 
 /* =====================================================
@@ -1852,22 +1855,105 @@ function writeSay() {
   if (set.type === 'letters') say('The letter ' + wUnits[wUnit]);
   else say(wUnits[wUnit]);
 }
+// Fraction of a letter's ENCLOSED spaces (the hole in o, a, e, b, d, g, p, q)
+// that got inked. A proper trace leaves them open (~0); colouring the letter
+// in fills them (~1). zoneD = letter strokes fattened; ink = child's marks.
+function counterFillRatio(zoneD, ink) {
+  const N = TSIZE, tot = N * N;
+  const isBg = p => zoneD[p * 4 + 3] <= 40;      // pixel is NOT on the letter
+  const reach = new Uint8Array(tot);
+  const st = [];
+  const seed = p => { if (isBg(p) && !reach[p]) { reach[p] = 1; st.push(p); } };
+  for (let x = 0; x < N; x++) { seed(x); seed((N - 1) * N + x); }
+  for (let y = 0; y < N; y++) { seed(y * N); seed(y * N + N - 1); }
+  while (st.length) {
+    const p = st.pop(), x = p % N, y = (p - x) / N;
+    if (x > 0) seed(p - 1);
+    if (x < N - 1) seed(p + 1);
+    if (y > 0) seed(p - N);
+    if (y < N - 1) seed(p + N);
+  }
+  let enc = 0, encInk = 0;
+  for (let p = 0; p < tot; p++) {
+    if (isBg(p) && !reach[p]) { enc++; if (ink[p * 4 + 3] > 40) encInk++; }
+  }
+  return enc ? encInk / enc : 0;
+}
+// Precise letter scoring: every stroke must be traced (catches a missing dot),
+// the ink must land on the letter and not colour it in, but there's wobble
+// room so a kid who doesn't stay exactly on the line still passes.
+function letterScore() {
+  const strokes = letterStrokes();
+  const tmp = () => { const c = document.createElement('canvas'); c.width = TSIZE; c.height = TSIZE; return c; };
+  const ink = tMaskCtx.getImageData(0, 0, TSIZE, TSIZE).data;
+  // fatten the child's ink so tracing slightly off the line still counts
+  const dCan = tmp(), dc = dCan.getContext('2d'), off = 15;
+  [[0,0],[off,0],[-off,0],[0,off],[0,-off],[off,off],[off,-off],[-off,off],[-off,-off]]
+    .forEach(o => dc.drawImage(tMask, o[0], o[1]));
+  const inkD = dc.getImageData(0, 0, TSIZE, TSIZE).data;
+  // the acceptable-ink zone: strokes fattened generously
+  const zCan = tmp(), zc = zCan.getContext('2d');
+  strokes.forEach(pts => pathOn(zc, pts, 56, '#000'));
+  const zoneD = zc.getImageData(0, 0, TSIZE, TSIZE).data;
+
+  // (1) each stroke's skeleton must be mostly reached by ink
+  let minCov = 1;
+  strokes.forEach(pts => {
+    const sCan = tmp(), sc = sCan.getContext('2d');
+    pathOn(sc, pts, 12, '#000');
+    const sd = sc.getImageData(0, 0, TSIZE, TSIZE).data;
+    let core = 0, hit = 0;
+    for (let i = 3; i < sd.length; i += 4) if (sd[i] > 40) { core++; if (inkD[i] > 40) hit++; }
+    const cov = core ? hit / core : 1;
+    if (cov < minCov) minCov = cov;
+  });
+  // (2) most of the ink should land on the letter, not all over the box
+  let inkTot = 0, inkOn = 0;
+  for (let i = 3; i < ink.length; i += 4) if (ink[i] > 40) { inkTot++; if (zoneD[i] > 40) inkOn++; }
+  const precision = inkTot ? inkOn / inkTot : 0;
+  // (3) enclosed spaces must stay open (not coloured in). Uses a thinner
+  // outline so the holes in o, e, a, and the triangle in A stay enclosed.
+  const hCan = tmp(), hc = hCan.getContext('2d');
+  strokes.forEach(pts => pathOn(hc, pts, 30, '#000'));
+  const holeD = hc.getImageData(0, 0, TSIZE, TSIZE).data;
+  const filled = counterFillRatio(holeD, ink);
+
+  let why = '';
+  if (minCov < 0.55) why = 'missing';
+  else if (filled > 0.4) why = 'filled';
+  else if (precision < 0.55) why = 'stray';
+  return { ok: !why, why };
+}
 function writeCheck() {
   if (!tHasInk) { wStatus('Draw with your finger first! ✏️'); sWrong(); say('Draw the letters first!'); return; }
   const set = WRITE_SETS[grade];
+  if (set.type === 'letters') {
+    const r = letterScore();
+    if (r.ok) {
+      sMatch();
+      if (wPhase === 1) { say('Great! Now try it all by yourself!'); writeSolo(); return; }
+      if (wTries === 0) wFirstTry++;
+      say(Math.random() < 0.5 ? 'Great job!' : 'Beautiful!');
+      writeNext();
+    } else {
+      wTries++;
+      sWrong();
+      if (r.why === 'missing') wStatus('Almost — trace every part of the letter! ✏️');
+      else if (r.why === 'filled') wStatus('Trace the lines — don’t colour it in! 🖍️');
+      else wStatus('Try to stay on the letter. 🎯');
+      if (wPhase === 2 && wTries >= 2) wStatus('Forgot the shape? Tap 💡 Hint!');
+    }
+    return;
+  }
   const m = document.createElement('canvas');
   m.width = TSIZE; m.height = TSIZE;
   const mc = m.getContext('2d');
-  if (set.type === 'letters') {
-    letterStrokes().forEach(pts => pathOn(mc, pts, 32, '#000'));
-  } else {
-    const wl = wordLayout();
-    mc.font = wordFont(wl.font);
-    mc.textAlign = 'center'; mc.textBaseline = 'middle';
-    mc.fillStyle = '#000'; mc.strokeStyle = '#000'; mc.lineWidth = Math.max(6, wl.font * 0.12);
-    const lh = wl.font * 1.18, y0 = 160 - ((wl.lines.length - 1) * lh) / 2;
-    wl.lines.forEach((l, i) => { mc.fillText(l, 160, y0 + i * lh); mc.strokeText(l, 160, y0 + i * lh); });
-  }
+  const wl = wordLayout();
+  mc.font = wordFont(wl.font);
+  mc.textAlign = 'center'; mc.textBaseline = 'middle';
+  mc.fillStyle = '#000'; mc.strokeStyle = '#000'; mc.lineWidth = Math.max(6, wl.font * 0.12);
+  const lh = wl.font * 1.18, y0 = 160 - ((wl.lines.length - 1) * lh) / 2;
+  wl.lines.forEach((l, i) => { mc.fillText(l, 160, y0 + i * lh); mc.strokeText(l, 160, y0 + i * lh); });
   const target = mc.getImageData(0, 0, TSIZE, TSIZE).data;
   const ink = tMaskCtx.getImageData(0, 0, TSIZE, TSIZE).data;
   let targetPix = 0, covered = 0, stray = 0;
@@ -1878,25 +1964,16 @@ function writeCheck() {
   }
   const cov = targetPix ? covered / targetPix : 0;
   const strayRatio = stray / (covered + 1);
-  const need = set.type === 'letters' ? 0.5 : 0.4;
-  if (cov >= need && strayRatio < 2.6) {
+  if (cov >= 0.4 && strayRatio < 2.6) {
     sMatch();
-    if (set.type === 'letters' && wPhase === 1) {
-      say('Great! Now try it all by yourself!');
-      writeSolo();
-      return;
-    }
     if (wTries === 0) wFirstTry++;
-    say(set.type === 'letters'
-      ? (Math.random() < 0.5 ? 'Great job!' : 'Beautiful!')
-      : 'You wrote ' + wUnits[wUnit] + '!');
+    say('You wrote ' + wUnits[wUnit] + '!');
     writeNext();
   } else {
     wTries++;
     sWrong();
-    if (cov < need) wStatus('Almost! Cover the whole ' + (set.type === 'letters' ? 'letter' : 'word') + '. 💪');
+    if (cov < 0.4) wStatus('Almost! Cover the whole word. 💪');
     else wStatus('Try to stay on the lines! 🎯');
-    if (set.type === 'letters' && wPhase === 2 && wTries >= 2) wStatus('Forgot the shape? Tap 💡 Hint!');
   }
 }
 function writeSkip() { wSkips++; writeNext(); }
